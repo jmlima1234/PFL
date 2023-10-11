@@ -14,4 +14,4 @@
 - The game ends when any player scores at least 100 points. If a player cannot remove any of his tiles on his turn, he passes and is out of the game. The game ends when both players have passed.
 
 ## End of the game 
-The game ends when a player scores at least 100 points. If a player cannot remove one of his/her pieces, he/she passes and is out of the game. It ends when both players have passed.
+- The game ends when a player scores at least 100 points. If a player cannot remove one of his/her pieces, he/she passes and is out of the game. It ends when both players have passed.
