@@ -26,21 +26,19 @@
 
 ### Internal representation of the game state
 
-<p> This game has a 10x10 board and will be represented by a list of lists, where each list represents a row of the board. Each cell of the board is represented by a tuple of 2 elements: the first element is the colour of the tile that is on the cell, and the second element is the value of the tile that is on the cell. If there is no tile on the cell, the tuple is (e, 0). The second element (value) is connected to the length of the piece on the board as it will be described below. </p>
+<p> This game has a 10x10 board and will be represented by a list of lists, where each list represents a row of the board. Each cell of the board is represented by a tuple of 2 elements: the first element is the colour of the tile that is on the cell, and the second element is the value of the tile that is on the cell. If there is no tile on the cell, there is no tuple and the cell will be with the following symbol ' - '. The second element (value) is connected to the value of the piece on the board as it will be described below. </p>
 </p>
 
 Possible values for the first element of the tuple:
-- e (empty cell)
-- b (black tile)
-- w (white tile)
+- D (dark tile)
+- W (light tile)
 
 Possible values for the second element of the tuple and their respective length:
-- 0 - 0
-- 1 - 3
-- 2 - 4
-- 3 - 5
-- 4 - 6
-- 6 - 7
+- 1 -> 3
+- 2 -> 4
+- 3 -> 5
+- 4 -> 6
+- 6 -> 7
   
 Number of each type of tile for each player:
 - 5 tiles of value 1
@@ -49,68 +47,194 @@ Number of each type of tile for each player:
 - 2 tiles of value 4
 - 1 tile of value 6
 
-<p>When the game board is displayed, empty cells are represented by a blank space. Cells containing black tiles are indicated by the letter 'B' followed by the tile's value, while cells with white tiles are represented by the letter 'W' followed by the tile's value. To determine whose turn it is, the current player's name will be prominently displayed at the beginning of each turn. Following the 'placement phase', players can view the remaining tiles that were not placed on the board. During the 'scoring phase', players have access to information about their counter's position on the board, and the current point totals.</p>
+<p>When the game board is displayed, empty cells are represented by a space with ' - '. Cells containing dark tiles are indicated by the letter 'D' followed by the tile's value, while cells with light tiles are represented by the letter 'L' followed by the tile's value. To determine whose turn it is, the current player's name will be prominently displayed at the beginning of each turn. Following the 'placement phase', players can view the remaining tiles that were not placed on the board. During the 'scoring phase', players have access to information about their counter's position on the board, and the current point totals.</p>
+
+
+### Game state representation
+- Placement Phase (empty board):
+
 
 ```pl
-Game state representation
 
-- Placement Phase (empty board):
-[   [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)]]
+[[' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',]]
 
-current_player('white').
-remaining_tiles('white',[(w,1), (w,1), (w,1), (w,1), (w,1), (w,2), (w,2), (w,2), (w,2), (w,3), (w,3), (w,3), (w,4), (w,4), (w,6)]).
-score_counter('white', 0, 0).
-score_counter('black', 9, 9).
-total_score('white', 0).
-total_score('black', 0).
+ ```
+
+ ```
+
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |    |  9  |  8  |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |     |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 90 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |   0 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 80 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  10 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 70 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  20 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 60 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  30 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 50 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  40 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 40 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  50 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 30 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  60 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 20 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  70 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 10 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  80 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 0  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  90 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |    |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |     |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+
+Current player: Light
+
+Choose a piece (value) [3-7] to move:
+|- 
+
+Choose a column [0-9] and a row [0-9] to move the piece to:
+|- 
+
+Remaining pieces for Light pieces player:
+ -5 pieces of value 3 (size 1)
+ -4 pieces of value 4 (size 2)
+ -3 pieces of value 5 (size 3)
+ -2 pieces of value 6 (size 4)
+ -1 pieces of value 7 (size 6)
+
+Remaining pieces for Dark pieces player:
+ -5 pieces of value 3 (size 1)
+ -4 pieces of value 4 (size 2)
+ -3 pieces of value 5 (size 3)
+ -2 pieces of value 6 (size 4)
+ -1 pieces of value 7 (size 6)
+
+Counter position for Light player: (0, 0)
+Score for Light player: 0
+
+Counter position for Dark player: (0, 0)
+Score for Dark player: 0
+```
 
 - Placement Phase (board with tiles):
-[   [(b, 3), (b, 3), (b, 3), (b, 3), (b, 3), (e, 0), (e, 0), (b, 2), (e, 0), (w, 3)],
-    [(w, 2), (w, 4), (w, 4), (w, 4), (w, 4), (w, 4), (w, 4), (b, 2), (b, 3), (w, 3)],
-    [(w, 2), (b, 1), (b, 3), (b, 3), (b, 3), (b, 3), (b, 3), (b, 2), (b, 3), (w, 3)],
-    [(w, 2), (b, 1), (e, 0), (b, 2), (b, 2), (b, 2), (b, 2), (b, 2), (b, 3), (w, 3)],
-    [(w, 2), (b, 1), (w, 4), (w, 4), (w, 4), (w, 4), (w, 4), (w, 4), (b, 3), (w, 3)],
-    [(b, 1), (b, 1), (b, 1), (w, 2), (w, 2), (w, 2), (w, 2), (e, 0), (b, 3), (e, 0)],
-    [(b, 1), (w, 1), (w, 1), (w, 1), (w, 1), (b, 3), (b, 3), (b, 3), (b, 3), (b, 3)],
-    [(b, 1), (w, 1), (e, 0), (w, 1), (w, 1), (w, 1), (e, 0), (w, 1), (w, 1), (b, 1)],
-    [(b, 1), (w, 1), (b, 2), (b, 2), (b, 2), (b, 2), (e, 0), (w, 1), (w, 1), (b, 1)],
-    [(b, 6), (b, 6), (b, 6), (b, 6), (b, 6), (b, 6), (b, 6), (w, 1), (w, 1), (b, 1)]]
 
-current_player('white').
-remaining_tiles('white',[(w,2), (w,2), (w,3), (w,3), (w,6)]).
-score_counter('white', 0, 0).
-score_counter('black', 9, 9).
-total_score('white', 0).
-total_score('black', 0).
+```pl
+
+[[('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3),' - ',' - ', ('D'-2),' - ', ('L'-3)],
+ [('L'-2), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('D'-2), ('D'-3), ('L'-3)],
+ [('L'-2), ('D'-1), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-2), ('D'-3), ('L'-3)],
+ [('L'-2), ('D'-1),' - ', ('D'-2), ('D'-2), ('D'-2), ('D'-2), ('D'-2), ('D'-3), ('L'-3)],
+ [('L'-2), ('D'-1), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('D'-3), ('L'-3)],
+ [('D'-1), ('D'-1), ('D'-1), ('L'-2), ('L'-2), ('L'-2), ('L'-2),' - ', ('D'-3), ' - ' ],
+ [('D'-1), ('L'-1), ('L'-1), ('L'-1), ('L'-1), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3)],
+ [('D'-1), ('L'-1),' - ', ('L'-1), ('L'-1), ('L'-1),' - ', ('L'-1), ('L'-1), ('D'-1)],
+ [('D'-1), ('L'-1), ('D'-2), ('D'-2), ('D'-2), ('D'-2),' - ', ('L'-1), ('L'-1), ('D'-1)],
+ [('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('L'-1), ('L'-1), ('D'-1)]]
+ ```
+
+```
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |    |  9  |  8  |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |     |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 90 | D-3 | D-3 | D-3 | D-3 | D-3 |  -  |  -  | D-2 |  -  | L-3 |   0 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 80 | L-2 | L-4 | L-4 | L-4 | L-4 | L-4 | L-4 | D-2 | D-3 | L-3 |  10 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 70 | L-2 | D-1 | D-3 | D-3 | D-3 | D-3 | D-3 | D-2 | D-3 | L-3 |  20 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 60 | L-2 | D-1 |  -  | D-2 | D-2 | D-2 | D-2 | D-2 | D-3 | L-3 |  30 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 50 | L-2 | D-1 | L-4 | L-4 | L-4 | L-4 | L-4 | L-4 | D-3 | L-3 |  40 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 40 | D-1 | D-1 | D-1 | L-2 | L-2 | L-2 | L-2 |  -  | D-3 |  -  |  50 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 30 | D-1 | L-1 | L-1 | L-1 | L-1 | D-3 | D-3 | D-3 | D-3 | D-3 |  60 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 20 | D-1 | L-1 |  -  | L-1 | L-1 | L-1 |  -  | L-1 | L-1 | D-1 |  70 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 10 | D-1 | L-1 | D-2 | D-2 | D-2 | D-2 |  -  | L-1 | L-1 | D-1 |  80 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 0  | D-6 | D-6 | D-6 | D-6 | D-6 | D-6 | D-6 | L-1 | L-1 | D-1 |  90 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |    |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |     |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+
+Current player: Light
+
+Choose a piece (value) [3-7] to move:
+|- 
+
+Choose a column [0-9] and a row [0-9] to move the piece to:
+|- 
+
+Counter position for Light player: (0, 0)
+Score for Light player: 0
+
+Counter position for Dark player: (0, 0)
+Score for Dark player: 0
+```
 
 - Scoring Phase (final):
-[   [(b, 3), (b, 3), (b, 3), (b, 3), (b, 3), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0)],
-    [(e, 0), (w, 4), (w, 4), (w, 4), (w, 4), (w, 4), (w, 4), (e, 0), (b, 3), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (b, 3), (w, 3)],
-    [(w, 2), (b, 1), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (b, 3), (e, 0)],
-    [(e, 0), (e, 0), (w, 4), (w, 4), (w, 4), (w, 4), (w, 4), (w, 4), (b, 3), (e, 0)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (b, 3), (e, 0)],
-    [(e, 0), (e, 0), (w, 1), (w, 1), (w, 1), (b, 3), (b, 3), (b, 3), (b, 3), (b, 3)],
-    [(e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (e, 0), (b, 1)],
-    [(e, 0), (e, 0), (b, 2), (b, 2), (b, 2), (b, 2), (e, 0), (e, 0), (e, 0), (b, 1)],
-    [(b, 6), (b, 6), (b, 6), (b, 6), (b, 6), (b, 6), (b, 6), (e, 0), (e, 0), (b, 1)]]
+  
+```pl
+[[('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3),' - ',' - ',' - ',' - '' - ',],
+ [' - ', ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4),' - ', ('D'-3)' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3), ('L'-3)],
+ [('L'-2), ('D'-1),' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3)' - ',],
+ [' - ',' - ', ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('D'-3)' - ',],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3)' - ',],
+ [' - ',' - ', ('L'-1), ('L'-1), ('L'-1), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3)],
+ [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-1)],
+ [' - ',' - ', ('D'-2), ('D'-2), ('D'-2), ('D'-2),' - ',' - ',' - ', ('D'-1)],
+ [('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6),' - ',' - ', ('D'-1)]]
+``` 
 
-current_player('black').
-remaining_tiles('black',[(b,1), (b,2), (b,4), (b,4)]).
-score_counter('white', 4, 2).
-score_counter('black', 2, 7).
-total_score('white', 24).
-total_score('black', 28).
+```
 
-No more tiles to remove. Game ends.
-Player 'black' wins!
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |    |  9  |  8  |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |     |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 90 | D-3 | D-3 | D-3 | D-3 | D-3 |  -  |  -  |  -  |  -  |  -  |   0 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 80 |  -  | L-4 | L-4 | L-4 | L-4 | L-4 | L-4 |  -  | D-3 |  -  |  10 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 70 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  | D-3 | L-3 |  20 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 60 | L-2 | D-1 |  -  |  -  |  -  |  -  |  -  |  -  | D-3 |  -  |  30 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 50 |  -  |  -  | L-4 | L-4 | L-4 | L-4 | L-4 | L-4 | D-3 |  -  |  40 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 40 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  | D-3 |  -  |  50 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 30 |  -  |  -  | L-1 | L-1 | L-1 | D-3 | D-3 | D-3 | D-3 | D-3 |  60 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 20 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  | D-1 |  70 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 10 |  -  |  -  | D-2 | D-2 | D-2 | D-2 |  -  |  -  |  -  | D-1 |  80 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ | 0  | D-6 | D-6 | D-6 | D-6 | D-6 | D-6 | D-6 |  -  |  -  | D-1 |  90 |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |    |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |     |
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+
+Current player: Dark
+
+Counter position for Light player: (2, 4)
+Score for Light player: 24
+
+Counter position for Dark player: (2, 8)
+Score for Dark player: 28
+
+No more tiles to remove. Game ends. 
+Player Dark wins!
 ```
