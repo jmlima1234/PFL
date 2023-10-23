@@ -31,7 +31,7 @@
 
 Possible values for the first element of the tuple:
 - D (dark tile)
-- W (light tile)
+- L (light tile)
 
 Possible values for the second element of the tuple and their respective length:
 - 1 -> 3
