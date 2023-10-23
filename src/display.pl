@@ -11,7 +11,7 @@ display_board(Board) :-
     %nl,
     %display_move_to,
     %nl,
-    %display_remaining_pieces,
+    display_remaining_pieces,
     display_counter_position,
     display_winner.
 
@@ -51,7 +51,7 @@ display_remaining_pieces(Player) :-
 
 display_players_pieces([]).
 display_players_pieces([player_value_pieces(_, Count, Size, Value)|Rest]) :-
-    format(' -~w pieces of value ~w (size ~w)~n', [Count, Size, Value]),
+    format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
     display_players_pieces(Rest).
 
 % Define a predicate to display the counter position

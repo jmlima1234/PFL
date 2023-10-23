@@ -106,18 +106,18 @@ Choose a column [0-9] and a row [0-9] to move the piece to:
 |- 
 
 Remaining pieces for Light pieces player:
- -5 pieces of value 3 (size 1)
- -4 pieces of value 4 (size 2)
- -3 pieces of value 5 (size 3)
- -2 pieces of value 6 (size 4)
- -1 pieces of value 7 (size 6)
+ -5 pieces of value 1 (size 3)
+ -4 pieces of value 2 (size 4)
+ -3 pieces of value 3 (size 5)
+ -2 pieces of value 4 (size 6)
+ -1 pieces of value 6 (size 7)
 
 Remaining pieces for Dark pieces player:
- -5 pieces of value 3 (size 1)
- -4 pieces of value 4 (size 2)
- -3 pieces of value 5 (size 3)
- -2 pieces of value 6 (size 4)
- -1 pieces of value 7 (size 6)
+ -5 pieces of value 1 (size 3)
+ -4 pieces of value 2 (size 4)
+ -3 pieces of value 3 (size 5)
+ -2 pieces of value 4 (size 6)
+ -1 pieces of value 6 (size 7)
 
 Counter position for Light player: (0, 0)
 Score for Light player: 0
@@ -187,15 +187,15 @@ Score for Dark player: 0
 - Scoring Phase (final):
   
 ```pl
-[[('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3),' - ',' - ',' - ',' - '' - ',],
- [' - ', ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4),' - ', ('D'-3)' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3), ('L'-3)],
- [('L'-2), ('D'-1),' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3)' - ',],
- [' - ',' - ', ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('D'-3)' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3)' - ',],
- [' - ',' - ', ('L'-1), ('L'-1), ('L'-1), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3)],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-1)],
- [' - ',' - ', ('D'-2), ('D'-2), ('D'-2), ('D'-2),' - ',' - ',' - ', ('D'-1)],
+[[('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3),' - ',' - ',' - ',' - ',' - '],
+ [' - ', ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4),' - ', ('D'-3),' - '],
+ [' - ', ' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3), ('L'-3)],
+ [('L'-2), ('D'-1),' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3),' - '],
+ [' - ', ' - ', ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('D'-3),' - '],
+ [' - ', ' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-3),' - '],
+ [' - ', ' - ', ('L'-1), ('L'-1), ('L'-1), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3)],
+ [' - ', ' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ('D'-1)],
+ [' - ', ' - ', ('D'-2), ('D'-2), ('D'-2), ('D'-2),' - ',' - ',' - ', ('D'-1)],
  [('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6),' - ',' - ', ('D'-1)]]
 ``` 
 
