@@ -1,3 +1,11 @@
+% name_of(+Player, -Name)
+% Find the Players name
+:- dynamic name_of/2.
+
+% difficulty(+Bot,-Difficulty)
+% Find the Bot difficulty
+:- dynamic difficulty/2.
+
 board(12,[
     ['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
     ['90',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', '  0 |'],
