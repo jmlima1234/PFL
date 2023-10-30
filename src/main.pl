@@ -77,5 +77,42 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, size) :-
     NextCol is Col + 1,
     check_possible_moves(Board, Pieces, Row, NextCol).
 
+% choose_move(+GameState,+Player,+Level,-Move)
+% Choose move a human player
+choose_move([Board, Player, _], ColI-RowI-ColF-RowF):-
+    \+difficulty(Player, _),                    
+    repeat,
+    get_move(ColI-RowI-ColF-RowF, piece),
+    player_value_pieces(_, _, size, piece),                 
+    validate_move_PP([Board,Player, _], ColI-RowI, ColF-RowF, size), !.  
 
+% choose move a bot player, fica pra mais tarde
+% choose_move([Board,Player,ForcedMoves,TotalMoves], Move):-
+    % difficulty(Player, Level),                  
+    % choose_move([Board,Player,ForcedMoves,TotalMoves], Player, Level, Move), !.   
 
+% move(+GameState, +Move, -NewGameState)
+% Moves a piece
+move(GameState, ColI-RowI-ColF-RowF, NewGameState):-                       
+    [Board, Player, _] = GameState,
+    
+
+% game_cycle(+GameState)
+% Loop that keeps the game running
+game_cycle(GameState):-
+    PP_over(GameState), !, 
+    game_over(GameState, Winner), !,
+    display_game(GameState),
+    show_winner(GameState, Winner).
+game_cycle(GameState):-
+    display_game(GameState),
+    print_turn(GameState),
+    choose_move(GameState, Move),
+    move(GameState, Move, NewGameState), !,
+    game_cycle(NewGameState).
+game_cycle(GameState):-
+    display_game(GameState),
+    print_turn(GameState),
+    choose_move_SP(GameState, Move),
+    move_SP(GameState, Move, NewGameState), !,
+    game_cycle(NewGameState).
