@@ -22,18 +22,20 @@ choose_difficulty(Bot) :-
     get_option(1, 2, 'Difficulty', Option), !,
     asserta((difficulty(Bot, Option))).
 
+
 option(1):-
     write('Human vs. Human\n'),
-    get_name(player1), get_name(player2).
+    asserta((name_of(player1, 'Dark'))),
+    asserta((name_of(player2, 'Light'))), !.
 option(2):-
     write('Human vs. Bot\n'),
-    get_name(player1),
-    asserta((name_of(player2, 'bot'))), !, 
+    asserta((name_of(player1, 'Dark'))),
+    asserta((name_of(player2, 'Light'))), !,
     choose_difficulty(player2).
 option(3):-
     write('Bot vs. Bot\n'),
-    asserta((name_of(player1, 'bot1'))),
-    asserta((name_of(player2, 'bot2'))), !,
+    asserta((name_of(player1, 'Dark'))),
+    asserta((name_of(player2, 'Light'))), !,
     choose_difficulty(player1),
     choose_difficulty(player2).
 
@@ -46,13 +48,12 @@ set_mode :-
     option(Option).
 
 % init_state(+Size,-Board)
-% Unifies Board with a Size matrix that represents the game: animals and empty pieces
 init_state(12, Board):-
     board(12, Board).
 
 % configuration(-GameState)
-% Initialize GameState with Board, first Player, empty FearList and TotalMoves
-configurations([Board,Player,[],0]):-
+% Initialize GameState with Board, first Player, phase
+configurations([Board,'Dark','Placement Phase']):-
     barca,
     set_mode,
     init_random_state,
