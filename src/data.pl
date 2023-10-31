@@ -6,7 +6,13 @@
 % Find the Bot difficulty
 :- dynamic difficulty/2.
 
+% users passed in PP
+:- dynamic passed/1.
+
 :- dynamic board/2.
+
+:- dynamic player_value_pieces/4.
+
 
 board(12,[
     ['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
@@ -29,10 +35,7 @@ current_player('Dark').
 % Define the opponent player
 opponent_player('Light').
 
-
-:- dynamic player_value_pieces/4.
-
-% Define facts for remaining pieces (player, number of pieces, size, value)
+% Define facts for remaining pieces (player, piece, number of pieces, size, value)
 player_value_pieces('Light', 5, 3, 1).
 player_value_pieces('Light', 4, 4, 2).
 player_value_pieces('Light', 3, 5, 3).
@@ -48,5 +51,9 @@ player_value_pieces('Dark', 1, 7, 6).
 score_counter('Light', 0, 0).
 score_counter('Dark', 0, 0).
 
-:- dynamic played_pieces/1.
-played_pieces([]).
+other_player(player1, player2).
+other_player(player2, player1).
+
+
+
+

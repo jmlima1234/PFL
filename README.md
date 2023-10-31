@@ -238,3 +238,4 @@ Score for Dark player: 28
 No more tiles to remove. Game ends. 
 Player Dark wins!
 ```
+**InitialBoard**

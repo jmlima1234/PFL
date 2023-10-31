@@ -35,10 +35,10 @@ validate_piece :-
 
 % Define a predicate to select a piece option with active selection
 pieceoption(PieceOption) :-
-    between(1, 5, PieceOption),
+    (PieceOption =:= 5 -> write('Invalid piece option: 5'), nl, fail; true),
+    between(1, 6, PieceOption),
     current_player(Player),
-    (PieceOption =:= 5 -> Value is 6 ; Value is PieceOption), % Use the if-then-else construct to conditionally set the value of Value
-    player_value_pieces(Player, _, _, Value), !. % Use Value instead of PieceOption
+    player_value_pieces(Player, _, _, PieceOption), !.  % Use PieceOption directly
 
 place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
     clear,
@@ -56,6 +56,7 @@ place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
     replace(OldBoard, Temprow, Tempcol2, Temprow2, Tempcol, Value, NewBoard),
     retract(board(BoardId, OldBoard)),
     assert(board(BoardId, NewBoard)),
+    assert(last_move(Row1-Col1-Col2-Row2)),
     display_board(NewBoard, Temprow, Temprow2, Tempcol, Tempcol2).
 
 % Define a predicate to replace the value on the board at the specified row and column

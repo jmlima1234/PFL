@@ -5,14 +5,18 @@
 :- consult('Menu_configurations.pl').
 :- consult('utils.pl').
 :- consult('placementphase.pl').
+:- consult('scoringphase.pl').
 
 
 % start_game
 start :-
+    %retractall(last_move(_)),
     %home,
     %board(_, Board),
     %display_board(Board),
-    validate_piece.
+    validate_piece,
+    is_piece_placed(1,1).
+
 
 % in_bounds(+Board,+Coordinate)
 % Checks if calculated coordinate is inside Board
@@ -33,11 +37,11 @@ validate_move_PP(GameState, ColI-RowI,ColF-RowF, size) :-
     nth1(ColI, RowList, Cell),
     Cell = ' - ',
     (
-        (ColF - ColI = size ->
+        (ColF - ColI =:= size ->
             Row is RowI + 1,
             NewSize is size - 1,
             validate_move_PP(GameState, ColI-ColF, Row-RowF, NewSize)
-        ; RowF - RowI = size ->
+        ; RowF - RowI =:= size ->
             Col is ColI + 1,
             NewSize is size - 1,
             validate_move_PP(GameState, Col-RowI, ColF-RowF, NewSize)
@@ -49,7 +53,7 @@ validate_move_PP(GameState, ColI-RowI,ColF-RowF, size) :-
 % Check if there are any possible moves for the current player
 has_possible_moves(GameState, Moves) :-
     [Board, Player, _] = GameState,
-    player_value_pieces(Player, Pieces, size, _),
+    player_value_pieces(Player, Pieces, _,  size, _),
     has_possible_moves(Board, Player, Pieces, Moves, size).
 
 % Base case: No pieces left, no possible moves
@@ -89,40 +93,68 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, size) :-
 
 % choose_move(+GameState,+Player,+Level,-Move)
 % Choose move a human player
-choose_move([Board, Player, _], ColI-RowI-ColF-RowF):-
+choose_move(GameState, ColI-RowI-ColF-RowF, piece, NewGameState):-
     \+difficulty(Player, _),                    
     repeat,
+    [Board, Player, Phase] = GameState,
     get_move(ColI-RowI-ColF-RowF, piece),
-    player_value_pieces(_, _, size, piece),                 
-    validate_move_PP([Board,Player, _], ColI-RowI, ColF-RowF, size), !.  
+    (
+        piece =:= 'pass' ->
+        write('You have already passed'),
+        assertz(passed(Player)),
+        other_player(Player,NextPlayer),
+        (passed(NextPlayer) ->
+            write('Both players have passed. Going to scoring phase!'),
+            NewPhase = 'Scoring Phase',
+            NewGameState = [Board, NextPlayer, NewPhase]
+            ;
+            NewGameState = [Board, NextPlayer, Phase]
+        ),
+        fail,
+        ;
+        player_value_pieces(_, _, piece, size, value),                 
+        validate_move_PP([Board,Player, _], ColI-RowI, ColF-RowF, size), !,
+        NewGameState = GameState
+    ).  
 
 % choose move a bot player, fica pra mais tarde
-% choose_move([Board,Player,ForcedMoves,TotalMoves], Move):-
+% choose_move([Board,Player, _], Move):-
     % difficulty(Player, Level),                  
     % choose_move([Board,Player,ForcedMoves,TotalMoves], Player, Level, Move), !.   
 
-% move(+GameState, +Move, -NewGameState)
+% move(+GameState, +Move, +piece, -NewGameState)
 % Moves a piece
-move(GameState, ColI-RowI-ColF-RowF, NewGameState):-                       
-    [Board, Player, _] = GameState,
-    
+move(NewGameState, ColI-RowI-ColF-RowF, piece, NewGameState2):-                       
+    [Board, Player, Phase] = NewGameState,
+    Phase =\= 'Scoring Phase',
+    place_piece(Piece, RowI, ColI, ColF, RowF),
+    other_player(Player, NextPlayer),
+    (passed(NextPlayer) ->
+        NewGameState2 = [NewBoard, Player, 'Placement Phase']
+        ;
+        NewGameState2 = [NewBoard, NextPlayer, 'Placement Phase']
+    ).
+
 
 % game_cycle(+GameState)
 % Loop that keeps the game running
 game_cycle(GameState):-
-    pp_over(GameState), !, 
     game_over(GameState, Winner), !,
     display_game(GameState),
     show_winner(GameState, Winner).
 game_cycle(GameState):-
-    display_game(GameState),
-    print_turn(GameState),
-    choose_move(GameState, Move),
-    move(GameState, Move, NewGameState), !,
-    game_cycle(NewGameState).
+    [Board, Player, Phase] = GameState,
+    Phase =\= 'Scoring Phase',
+    display_board(Board),
+    % print_turn(GameState),
+    choose_move(GameState, Move, piece, NewGameState), !
+    move(NewGameState, Move, NewGameState2, piece), !,
+    game_cycle(NewGameState2).
 game_cycle(GameState):-
-    display_game(GameState),
-    print_turn(GameState),
-    choose_move_SP(GameState, Move),
-    move_SP(GameState, Move, NewGameState), !,
-    game_cycle(NewGameState).
+    [Board, Player, Phase] = GameState,
+    Phase =:= 'Scoring Phase',
+    display_board(Board),
+    % print_turn(NewGameState),
+    % choose_move_SP(NewGameState, Move),
+    % move_SP(NewGameState, Move, NewGameState2), !,
+    % game_cycle(NewGameState2).
