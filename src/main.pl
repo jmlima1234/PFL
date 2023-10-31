@@ -1,8 +1,17 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
-:- consult('display.pls').
+:- use_module(library(clpfd)).
+:- consult('display.pl').
 :- consult('Menu_configurations.pl').
 :- consult('utils.pl').
+
+
+% start_game
+start :-
+    home,
+    board(_, Board),
+    display_board(Board),
+    validate_piece.
 
 % in_bounds(+Board,+Coordinate)
 % Checks if calculated coordinate is inside Board
@@ -79,16 +88,18 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, size) :-
 
 % choose_move(+GameState,+Player,+Level,-Move)
 % Choose move a human player
-choose_move(GameState, ColI-RowI-ColF-RowF, piece):-
+choose_move(GameState, ColI-RowI-ColF-RowF, piece, NewGameState):-
     \+difficulty(Player, _),                    
     repeat,
     [Board, Player, Phase] = GameState,
     get_move(ColI-RowI-ColF-RowF, piece),
     (
         piece =:= 'pass' ->
+        write('You have already passed'),
         assertz(passed(Player)),
         other_player(Player,NextPlayer),
         (passed(NextPlayer) ->
+            write('Both players have passed. Going to scoring phase!'),
             NewPhase = 'Scoring Phase',
             NewGameState = [Board, NextPlayer, NewPhase]
             ;
@@ -97,7 +108,8 @@ choose_move(GameState, ColI-RowI-ColF-RowF, piece):-
         fail,
         ;
         player_value_pieces(_, _, piece, size, value),                 
-        validate_move_PP([Board,Player, _], ColI-RowI, ColF-RowF, size), !.
+        validate_move_PP([Board,Player, _], ColI-RowI, ColF-RowF, size), !,
+        NewGameState = GameState
     ).  
 
 % choose move a bot player, fica pra mais tarde
@@ -107,14 +119,15 @@ choose_move(GameState, ColI-RowI-ColF-RowF, piece):-
 
 % move(+GameState, +Move, +piece, -NewGameState)
 % Moves a piece
-move(GameState, ColI-RowI-ColF-RowF, piece, NewGameState):-                       
-    [Board, Player, _] = GameState,
-    put_piece(Board, Col-Row, Piece, NewBoard),
-    (passed(Player) ->
-        other_player(Player, NextPlayer),
-        NewGameState = [NewBoard, NextPlayer, 'Placement Phase']
+move(NewGameState, ColI-RowI-ColF-RowF, piece, NewGameState2):-                       
+    [Board, Player, Phase] = NewGameState,
+    Phase =\= 'Scoring Phase',
+    place_piece(Piece, RowI, ColI, ColF, RowF),
+    other_player(Player, NextPlayer),
+    (passed(NextPlayer) ->
+        NewGameState2 = [NewBoard, Player, 'Placement Phase']
         ;
-        NewGameState = [NewBoard, Player, 'Placement Phase']
+        NewGameState2 = [NewBoard, NextPlayer, 'Placement Phase']
     ).
 
 
@@ -127,16 +140,16 @@ game_cycle(GameState):-
 game_cycle(GameState):-
     [Board, Player, Phase] = GameState,
     Phase =\= 'Scoring Phase',
-    display_game(GameState),,
-    print_turn(GameState),
-    choose_move(GameState, Move, piece), !
-    move(GameState, Move, NewGameState, piece), !,
-    game_cycle(NewGameState).
+    display_board(Board),
+    % print_turn(GameState),
+    choose_move(GameState, Move, piece, NewGameState), !
+    move(NewGameState, Move, NewGameState2, piece), !,
+    game_cycle(NewGameState2).
 game_cycle(GameState):-
     [Board, Player, Phase] = GameState,
     Phase =:= 'Scoring Phase',
-    display_game(NewGameState),
-    print_turn(NewGameState),
-    choose_move_SP(NewGameState, Move),
-    move_SP(NewGameState, Move, NewGameState2), !,
-    game_cycle(NewGameState2).
+    display_board(Board),
+    % print_turn(NewGameState),
+    % choose_move_SP(NewGameState, Move),
+    % move_SP(NewGameState, Move, NewGameState2), !,
+    % game_cycle(NewGameState2).

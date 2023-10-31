@@ -13,14 +13,16 @@ read_number_aux(X,X).
 % Unifies Value with the value given by user input between Min and Max when asked about Context
 get_option(Min,Max,Context,Value):-
     format('~a between ~d and ~d: ', [Context, Min, Max]),
+    nl,
     repeat,
     read_number(Value),
     between(Min, Max, Value), !.
 
+
 % get_move(+Board,-Coordinate)
 % Unifies Coordinate with a valid coordinate given by input within the Board
-get_move(Col1-Row1-Col2-Row2, piece):-
-    get_option(1, 6, 'Choose your piece value', piece),
+get_move(Col1-Row1-Col2-Row2, Piece):-
+    get_option(1, 6, 'Choose your piece value', Piece),
     get_option(1, 10, 'Start column', Col1),
     get_option(1, 10, 'Start row', Row1),
     get_option(1, 10, 'Destination column', Col2),
