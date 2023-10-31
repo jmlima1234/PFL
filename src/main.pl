@@ -4,6 +4,7 @@
 :- consult('display.pl').
 :- consult('Menu_configurations.pl').
 :- consult('utils.pl').
+:- consult('placementphase.pl').
 
 
 % start_game
