@@ -10,6 +10,15 @@ display_board(Board) :-
     display_remaining_pieces,
     display_counter_position.
 
+display_board(Board, Row1, Row2, Col1, Col2) :-
+    nl,
+    display_separator,
+    display_rows(Row1, Row2, Col1, Col2, 1, Board),
+    nl,
+    display_current_player,
+    display_remaining_pieces,
+    display_counter_position.
+
 % Two clear lines
 blank_lines :-
     nl, nl.
@@ -23,14 +32,31 @@ display_rows([Row|Rows]) :-
     display_row(Row),
     display_separator,
     display_rows(Rows).
-
-display_separator :-
-    write(' |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| '), nl.
-
 display_row([]) :- nl.
 display_row([Cell|Rest]) :-
     write(' | '), write(Cell),
     display_row(Rest).
+
+display_rows(_, _, _, _, _, []).
+display_rows(Row1, Row2, Col1, Col2, CurrentRow, [Row|Rows]) :-
+    display_row(Row1, Row2, Col1, Col2, CurrentRow, 1, Row, 0),
+    display_separator,
+    NextRow is CurrentRow + 1,
+    display_rows(Row1, Row2, Col1, Col2, NextRow, Rows).
+
+display_row(_, _, _, _, _, _, [], _) :- nl.
+display_row(Row1, Row2, Col1, Col2, CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
+    (Row1 =< CurrentRow, CurrentRow =< Row2, Col1 =< CurrentCol, CurrentCol =< Col2, HasWritten == 0 -> write(' | '), write(Cell), HasWritten1 is 1
+    ;
+    Row1 =< CurrentRow, CurrentRow =< Row2, Col1 =< CurrentCol, CurrentCol =< Col2 -> write('   '), write(Cell), HasWritten1 is HasWritten
+    ;
+    write(' | '), write(Cell), HasWritten1 is HasWritten),
+    NextCol is CurrentCol + 1,
+    display_row(Row1, Row2, Col1, Col2, CurrentRow, NextCol, Rest, HasWritten1).
+
+
+display_separator :-
+    write(' |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| '), nl.
 
 % Predicate to display current player
 display_current_player :-
@@ -115,11 +141,10 @@ place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
     replace(OldBoard, Temprow, Tempcol2, Temprow2, Tempcol, Value, NewBoard),
     retract(board(BoardId, OldBoard)),
     assert(board(BoardId, NewBoard)),
-    display_board(NewBoard).
+    display_board(NewBoard, Temprow, Temprow2, Tempcol, Tempcol2).
 
 % Define a predicate to replace the value on the board at the specified row and column
 replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard) :-
-    format('Row1: ~w, Col1: ~w, Row2: ~w, Col2: ~w, Value: ~w~n', [Row1, Col1, Row2, Col2, Value]),
     ( Row1 == Row2 ->
         nth1(Row1, OldBoard, OldRow),
         current_player(Player),
@@ -127,10 +152,10 @@ replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard) :-
         replace_list(OldBoard, Row1, NewRow, NewBoard)
      ;Col1 == Col2 ->
         transpose(OldBoard, TransposedBoard),
-        nth1(Row1, TransposedBoard, OldRow),
+        nth1(Col1, TransposedBoard, OldRow),
         current_player(Player),
-        replace_row(OldRow, Col1, Col2, Value, Player, NewRow),
-        replace_list(TransposedBoard, Row1, NewRow, TempBoard),
+        replace_row(OldRow, Row1, Row2, Value, Player, NewRow),
+        replace_list(TransposedBoard, Col1, NewRow, TempBoard),
         transpose(TempBoard, NewBoard)
     ).
 
@@ -146,6 +171,5 @@ replace_row(Row, Col1, Col2, X, Player, NewRow) :-
     length(Row, Length),
     number_chars(X, XChars),
     atom_chars(XAtom, XChars),
-    sub_atom(Player, 0, 1, _, PlayerInitial),  % Extract the first character of the Player atom
-    sort([Col1, Col2], [SortedCol1, SortedCol2]),
+    sub_atom(Player, 0, 1, _, PlayerInitial),
     findall(Y, (between(1, Length, I), (I >= Col1, I =< Col2 -> atom_concat(PlayerInitial, '-', Temp), atom_concat(Temp, XAtom, Y); nth1(I, Row, Y))), NewRow).

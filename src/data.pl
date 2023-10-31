@@ -47,3 +47,6 @@ player_value_pieces('Dark', 1, 7, 6).
 % Define facts for score counters position
 score_counter('Light', 0, 0).
 score_counter('Dark', 0, 0).
+
+:- dynamic played_pieces/1.
+played_pieces([]).

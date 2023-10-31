@@ -8,9 +8,9 @@
 
 % start_game
 start :-
-    home,
-    board(_, Board),
-    display_board(Board),
+    %home,
+    %board(_, Board),
+    %display_board(Board),
     validate_piece.
 
 % in_bounds(+Board,+Coordinate)
