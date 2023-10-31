@@ -1,8 +1,17 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
-:- consult('display.pls').
+:- use_module(library(clpfd)).
+:- consult('display.pl').
 :- consult('Menu_configurations.pl').
 :- consult('utils.pl').
+
+
+% start_game
+start :-
+    home,
+    board(_, Board),
+    display_board(Board),
+    validate_piece.
 
 % in_bounds(+Board,+Coordinate)
 % Checks if calculated coordinate is inside Board
@@ -100,7 +109,7 @@ move(GameState, ColI-RowI-ColF-RowF, NewGameState):-
 % game_cycle(+GameState)
 % Loop that keeps the game running
 game_cycle(GameState):-
-    PP_over(GameState), !, 
+    pp_over(GameState), !, 
     game_over(GameState, Winner), !,
     display_game(GameState),
     show_winner(GameState, Winner).

@@ -1,7 +1,7 @@
 :- consult(utils).
 
 % Game header
-Isaac:-
+isaac:-
     write('=================\n'),
     write('Welcome to Isaac!\n'),
     write('=================\n').
@@ -11,7 +11,8 @@ menu:-
     write('Please select game mode:\n'),
     write('1 - Human vs. Human\n'),
     write('2 - Human vs. Bot\n'),
-    write('3 - Bot vs. Bot\n').
+    write('3 - Bot vs. Bot\n'),
+    nl.
 
 % choose_difficulty(+Bot)
 % Choose Bot difficulty (1 or 2)
@@ -20,20 +21,27 @@ choose_difficulty(Bot) :-
     write('1 - Random\n'),
     write('2 - Hard\n'),
     get_option(1, 2, 'Difficulty', Option), !,
-    asserta((difficulty(Bot, Option))).
+    asserta((difficulty(Bot, Option))),
+    nl.
 
 
 option(1):-
+    clear,
     write('Human vs. Human\n'),
+    nl,
     asserta((name_of(player1, 'Dark'))),
     asserta((name_of(player2, 'Light'))), !.
 option(2):-
+    clear,
     write('Human vs. Bot\n'),
+    nl,
     asserta((name_of(player1, 'Dark'))),
     asserta((name_of(player2, 'Light'))), !,
     choose_difficulty(player2).
 option(3):-
+    clear,
     write('Bot vs. Bot\n'),
+    nl,
     asserta((name_of(player1, 'Dark'))),
     asserta((name_of(player2, 'Light'))), !,
     choose_difficulty(player1),
@@ -47,6 +55,7 @@ set_mode :-
     get_option(1, 3, 'Mode', Option), !,
     option(Option).
 
+
 % init_state(+Size,-Board)
 init_state(12, Board):-
     board(12, Board).
@@ -54,9 +63,16 @@ init_state(12, Board):-
 % configuration(-GameState)
 % Initialize GameState with Board, first Player, phase
 configurations([Board,'Dark','Placement Phase']):-
-    barca,
+    isaac,
     set_mode,
     init_random_state,
     choose_player(Player),
     choose_board(Size), 
     init_state(Size, Board).
+
+% Home screen
+home:-
+    clear,
+    isaac,
+    blank_lines,
+    set_mode.
