@@ -4,14 +4,22 @@
 :- consult('display.pl').
 :- consult('Menu_configurations.pl').
 :- consult('utils.pl').
+:- consult('placementphase.pl').
+:- consult('scoringphase.pl').
 
 
 % start_game
 start :-
+    retractall(last_move(_)),
     home,
     board(_, Board),
     display_board(Board),
-    validate_piece.
+    validate_piece,
+    validate_piece,
+    validate_piece,
+    remove_piece(3,4),
+    remove_piece(1,8),
+    remove_piece(1,1).
 
 % in_bounds(+Board,+Coordinate)
 % Checks if calculated coordinate is inside Board

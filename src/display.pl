@@ -4,7 +4,7 @@
 display_board(Board) :-
     nl,
     display_separator,
-    display_rows(Board),
+    display_rows(1,Board),
     nl,
     display_current_player,
     display_remaining_pieces,
@@ -18,19 +18,36 @@ blank_lines :-
 clear :-
     write('\e[2J').
 
-display_rows([]).
-display_rows([Row|Rows]) :-
-    display_row(Row),
+display_rows(_, []) :- nl.
+display_rows(CurrentRow, [Row|Rows]) :-
+    display_row(CurrentRow, 1, Row, 0),
     display_separator,
-    display_rows(Rows).
+    NextRow is CurrentRow + 1,
+    display_rows(NextRow, Rows).
+
+display_row(_, _, [], _) :- nl.
+display_row(CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
+    findall(LastMove, last_move(LastMove), LastMoves),
+    (LastMoves = [] ->
+        write(' | '), write(Cell), HasWritten1 is HasWritten
+    ;
+        % Check if the current cell is in the range specified by LastMoves
+        (member(Row1-Col1-Col2-Row2, LastMoves), Row1 =< CurrentRow, CurrentRow =< Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
+            (HasWritten == 0 ->
+                write(' | '), write(Cell), HasWritten1 is 1
+            ;
+                write('   '), write(Cell), HasWritten1 is HasWritten)
+        ;
+            write(' | '), write(Cell), HasWritten1 is HasWritten)
+    ),
+
+    NextCol is CurrentCol + 1,
+    display_row(CurrentRow, NextCol, Rest, HasWritten1).
+
 
 display_separator :-
     write(' |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| '), nl.
-
-display_row([]) :- nl.
-display_row([Cell|Rest]) :-
-    write(' | '), write(Cell),
-    display_row(Rest).
+    
 
 % Predicate to display current player
 display_current_player :-
@@ -38,24 +55,6 @@ display_current_player :-
     format('Current player: ~w~n', [Player]),
     nl.
 
-% Define a predicate to display the remaining pieces of each player
-display_remaining_pieces :-
-    current_player(Player),
-    opponent_player(Opponent),
-    display_remaining_pieces(Player),
-    nl,
-    display_remaining_pieces(Opponent),
-    nl.
-
-display_remaining_pieces(Player) :-
-    findall(player_value_pieces(Player, Count, Size, Value), player_value_pieces(Player, Count, Size, Value), PlayerPieces),
-    format('Remaining pieces for ~w pieces player:~n', [Player]),
-    display_players_pieces(PlayerPieces).
-
-display_players_pieces([]).
-display_players_pieces([player_value_pieces(_, Count, Size, Value)|Rest]) :-
-    format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
-    display_players_pieces(Rest).
 
 % Define a predicate to display the counter position
 display_counter_position :-
@@ -68,7 +67,6 @@ display_counter_position([score_counter(Player, Row, Col)|Rest]) :-
     format('Counter position for ~w player: (~w, ~w)~n', [Player, Row, Col]),
     format('Score for ~w player: ~w~n~n', [Player, Score]),
     display_counter_position(Rest).
-
 
 % Define a predicate to display the winner
 display_winner :-
@@ -86,7 +84,7 @@ game_start :-
     validate_piece.
 
 
-% Define a predicate to validate the users piece selection
+% Define a predicate to validate the user's piece selection
 validate_piece :-
     get_move(Col1-Row1-Col2-Row2, PieceOption),
     pieceoption(PieceOption),

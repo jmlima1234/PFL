@@ -48,11 +48,5 @@ player_value_pieces('Dark',d4, 2, 6, 4).
 player_value_pieces('Dark',d5, 1, 7, 6).
 
 % Define facts for score counters position
-score_counter('Light', 2, 4).
-score_counter('Dark', 2, 8).
-
-
-other_player(player1, player2).
-other_player(player2, player1).
-
-
+score_counter('Light', 0, 0).
+score_counter('Dark', 0, 0).
