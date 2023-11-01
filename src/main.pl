@@ -15,7 +15,7 @@ start :-
     %board(_, Board),
     %display_board(Board),
     validate_piece,
-    is_piece_placed(1,1).
+    remove_piece(1,1).
 
 
 % in_bounds(+Board,+Coordinate)

@@ -18,7 +18,6 @@ get_option(Min,Max,Context,Value):-
     read_number(Value),
     between(Min, Max, Value), !.
 
-
 % get_move(+Board,-Coordinate)
 % Unifies Coordinate with a valid coordinate given by input within the Board
 get_move(Col1-Row1-Col2-Row2, Piece):-
@@ -33,4 +32,9 @@ put_piece(Board, Col-Row, Piece, NewBoard) :-
     nth0(Row,Board,Line),
     replace(Col, Piece, Line, NewLine),
     replace(Row, NewLine, Board, NewBoard).
+
+% Helper function to check if a last move occupies a given row and column
+occupies(Row1-Col1-Col2-Row2, Row, Col) :-
+    between(Row1, Row2, Row),
+    between(Col1, Col2, Col).
 
