@@ -1,21 +1,35 @@
 :- consult('data.pl').
 :- consult('display.pl').
 :- consult('placementphase.pl').
-:- consult('utils.pl').
+
+
+check_all_moves([], _, _) :-
+    write('false'), !.
+
+check_all_moves([Row1-Col1-Col2-Row2|Rest], Row, Col) :-
+    % Check if the last move occupies the given row and column
+    (occupies(Row1-Col1-Col2-Row2, Row, Col) ->
+        retract(last_move(Row1-Col1-Col2-Row2)),  % Remove the piece from last_move/1 if it's found
+        remove_piece(Row1-Col1-Col2-Row2), !
+    ;
+        check_all_moves(Rest, Row, Col)).  % Continue with the rest of the list
+
+% Helper function to check if a last move occupies a given row and column
+occupies(Row1-Col1-Col2-Row2, Row, Col) :-
+    between(Row1, Row2, Row),
+    between(Col1, Col2, Col).
 
 remove_piece(Row, Col) :-
     % Iterate through the last moves
     findall(LastMove, last_move(LastMove), LastMoves),
-    check_all_moves(LastMoves, Row, Col).
+    TempRow is Row + 1,
+    TempCol is Col + 1,
+    check_all_moves(LastMoves, TempRow, TempCol).
 
 remove_piece(Row1-Col1-Col2-Row2) :-
     clear,
     board(BoardId, OldBoard),
-    Temprow is Row1 + 1,
-    Temprow2 is Row2 + 1,
-    Tempcol is Col1 + 1,
-    Tempcol2 is Col2 + 1,
-    empty_cell(OldBoard, Temprow, Tempcol, Temprow2, Tempcol2, NewBoard),
+    empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard),
     retract(board(BoardId, OldBoard)),
     assert(board(BoardId, NewBoard)),
     display_board(NewBoard).
@@ -34,9 +48,6 @@ empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard) :-
         transpose(TempBoard, NewBoard)
     ).
 
-
-% Define a predicate to replace a range of values at the specified indices in a row
-% Prolog
 
 % Define a predicate to replace a range of values at the specified indices in a row
 replace_row(Row, Col1, Col2, NewRow) :-
