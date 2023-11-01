@@ -14,13 +14,12 @@ start :-
     home,
     board(_, Board),
     display_board(Board),
-    validate_piece.
-    %validate_piece,
-    %validate_piece,
-    %remove_piece(1,1), 
-    %remove_piece(3,4),
-    %remove_piece(1,8).
-
+    validate_piece,
+    validate_piece,
+    validate_piece,
+    remove_piece(3,4),
+    remove_piece(1,8),
+    remove_piece(1,1).
 
 % in_bounds(+Board,+Coordinate)
 % Checks if calculated coordinate is inside Board

@@ -1,23 +1,12 @@
 :- consult('data.pl').
 :- consult('display.pl').
 :- consult('placementphase.pl').
+:- consult('utils.pl').
 
 remove_piece(Row, Col) :-
     % Iterate through the last moves
     findall(LastMove, last_move(LastMove), LastMoves),
-    format('Last moves: ~w~n', [LastMoves]),
     check_all_moves(LastMoves, Row, Col).
-
-check_all_moves([], _, _) :-
-    write('false'), !.
-
-check_all_moves([Row1-Col1-Col2-Row2|Rest], Row, Col) :-
-    % Check if the last move occupies the given row and column
-    (occupies(Row1-Col1-Col2-Row2, Row, Col) ->
-        retract(last_move(Row1-Col1-Col2-Row2)),  % Remove the piece from last_move/1 if it's found
-        remove_piece(Row1-Col1-Col2-Row2), !
-    ;
-        check_all_moves(Rest, Row, Col)).  % Continue with the rest of the list
 
 remove_piece(Row1-Col1-Col2-Row2) :-
     clear,

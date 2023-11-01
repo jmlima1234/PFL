@@ -4,16 +4,7 @@
 display_board(Board) :-
     nl,
     display_separator,
-    display_rows(Board),
-    nl,
-    display_current_player,
-    display_remaining_pieces,
-    display_counter_position.
-
-display_board(Board, Row1, Row2, Col1, Col2) :-
-    nl,
-    display_separator,
-    display_rows(Row1, Row2, Col1, Col2, 1, Board),
+    display_rows(1,Board),
     nl,
     display_current_player,
     display_remaining_pieces,
@@ -27,36 +18,36 @@ blank_lines :-
 clear :-
     write('\e[2J').
 
-display_rows([]).
-display_rows([Row|Rows]) :-
-    display_row(Row),
-    display_separator,
-    display_rows(Rows).
-display_row([]) :- nl.
-display_row([Cell|Rest]) :-
-    write(' | '), write(Cell),
-    display_row(Rest).
-
-display_rows(_, _, _, _, _, []).
-display_rows(Row1, Row2, Col1, Col2, CurrentRow, [Row|Rows]) :-
-    display_row(Row1, Row2, Col1, Col2, CurrentRow, 1, Row, 0),
+display_rows(_, []) :- nl.
+display_rows(CurrentRow, [Row|Rows]) :-
+    display_row(CurrentRow, 1, Row, 0),
     display_separator,
     NextRow is CurrentRow + 1,
-    display_rows(Row1, Row2, Col1, Col2, NextRow, Rows).
+    display_rows(NextRow, Rows).
 
-display_row(_, _, _, _, _, _, [], _) :- nl.
-display_row(Row1, Row2, Col1, Col2, CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
-    (Row1 =< CurrentRow, CurrentRow =< Row2, Col1 =< CurrentCol, CurrentCol =< Col2, HasWritten == 0 -> write(' | '), write(Cell), HasWritten1 is 1
+display_row(_, _, [], _) :- nl.
+display_row(CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
+    findall(LastMove, last_move(LastMove), LastMoves),
+    (LastMoves = [] ->
+        write(' | '), write(Cell), HasWritten1 is HasWritten
     ;
-    Row1 =< CurrentRow, CurrentRow =< Row2, Col1 =< CurrentCol, CurrentCol =< Col2 -> write('   '), write(Cell), HasWritten1 is HasWritten
-    ;
-    write(' | '), write(Cell), HasWritten1 is HasWritten),
+        % Check if the current cell is in the range specified by LastMoves
+        (member(Row1-Col1-Col2-Row2, LastMoves), Row1 =< CurrentRow, CurrentRow =< Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
+            (HasWritten == 0 ->
+                write(' | '), write(Cell), HasWritten1 is 1
+            ;
+                write('   '), write(Cell), HasWritten1 is HasWritten)
+        ;
+            write(' | '), write(Cell), HasWritten1 is HasWritten)
+    ),
+
     NextCol is CurrentCol + 1,
-    display_row(Row1, Row2, Col1, Col2, CurrentRow, NextCol, Rest, HasWritten1).
+    display_row(CurrentRow, NextCol, Rest, HasWritten1).
 
 
 display_separator :-
     write(' |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| '), nl.
+    
 
 % Predicate to display current player
 display_current_player :-
