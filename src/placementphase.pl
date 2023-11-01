@@ -57,7 +57,7 @@ place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
     retract(board(BoardId, OldBoard)),
     assert(board(BoardId, NewBoard)),
     assert(last_move(Row1-Col1-Col2-Row2)),
-    display_board(NewBoard, Temprow, Temprow2, Tempcol, Tempcol2).
+    display_board(NewBoard).
 
 % Define a predicate to replace the value on the board at the specified row and column
 replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard) :-
