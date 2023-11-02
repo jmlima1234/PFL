@@ -11,7 +11,7 @@
 
 :- dynamic board/2.
 
-:- dynamic player_value_pieces/4.
+:- dynamic player_value_pieces/5.
 
 :- dynamic last_move/1.
 

@@ -95,6 +95,13 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, size) :-
     NextCol is Col + 1,
     check_possible_moves(Board, Pieces, Row, NextCol).
 
+% play/0
+% Starts the game and clears data when it ends 
+play :-
+    configurations(GameState), !,
+    game_cycle(GameState),
+    clear_data.
+
 % game_cycle(+GameState)
 % Loop that keeps the game running
 game_cycle(GameState):-

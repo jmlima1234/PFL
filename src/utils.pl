@@ -1,5 +1,13 @@
 :- use_module(library(between)).
 
+clear_data :-
+    retractall(name_of(_,_)),
+    retractall(passed(_)),
+    retractall(difficulty(_, _)),
+    retractall(board(_, _)),
+    retractall(player_value_pieces(_, _, _, _, _)),
+    retractall(last_move(_)).
+
 read_number(X):-
     read_number_aux(X,0).
 read_number_aux(X,Acc):- 
@@ -25,7 +33,7 @@ get_move(Player, Col1-Row1-Col2-Row2, Piece):-
     (Piece =:= 'pass' ->
         assertz(passed(Player))
     ;
-    )
+    ),
     get_option(1, 10, 'Start column', Col1),
     get_option(1, 10, 'Start row', Row1),
     get_option(1, 10, 'Destination column', Col2),
@@ -48,7 +56,7 @@ check_all_moves([], _, _) :-
 check_all_moves([Row1-Col1-Col2-Row2|Rest], Row, Col) :-
     % Check if the last move occupies the given row and column
     (occupies(Row1-Col1-Col2-Row2, Row, Col) ->
-        retract(last_move(Row1-Col1-Col2-Row2)),  % Remove the piece from last_move/1 if it's found
+        retract(last_move(Row1-Col1-Col2-Row2)),  % Remove the piece from last_move/1 if its found
         remove_piece(Row1-Col1-Col2-Row2), !
     ;
         check_all_moves(Rest, Row, Col)).  % Continue with the rest of the list
