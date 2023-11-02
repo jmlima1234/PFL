@@ -13,6 +13,7 @@
 
 :- dynamic player_value_pieces/4.
 
+:- dynamic last_move/1.
 
 board(12,[
     ['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
@@ -34,6 +35,10 @@ current_player('Dark').
 
 % Define the opponent player
 opponent_player('Light').
+
+other_player(player1, player2).
+other_player(player2, player1).
+
 
 % Define facts for remaining pieces (player, piece, number of pieces, size, value)
 player_value_pieces('Light',l1, 5, 3, 1).

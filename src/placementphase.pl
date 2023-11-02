@@ -27,11 +27,14 @@ game_start :-
     start_board,
     validate_piece.
 
-% Define a predicate to validate the user's piece selection
-validate_piece :-
-    get_move(Col1-Row1-Col2-Row2, PieceOption),
+% Define a predicate to validate the users piece selection
+validate_piece(GameState, Board, NewGameState) :-
+    [Board, Player, Phase] = GameState,
+    get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
+    player_value_pieces(_, _, _, size, _)
+    validate_move_PP(GameState, Col1-Row1,Col2-Row2, size), !,
     pieceoption(PieceOption),
-    place_piece(PieceOption, Row1, Col1, Col2, Row2).
+    place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState).
 
 % Define a predicate to select a piece option with active selection
 pieceoption(PieceOption) :-
@@ -40,9 +43,9 @@ pieceoption(PieceOption) :-
     current_player(Player),
     player_value_pieces(Player, _, _, PieceOption), !.  % Use PieceOption directly
 
-place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
+place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState) :-
     clear,
-    current_player(Player),
+    [Board, Player, Phase] = GameState,
     (PieceOption =:= 5 -> Value is 6 ; Value is PieceOption),
     player_value_pieces(Player, Count, Size, Value),
     NewCount is Count - 1,
@@ -58,6 +61,8 @@ place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
     assert(board(BoardId, NewBoard)),
     assert(last_move(Temprow-Tempcol-Tempcol2-Temprow2)),
     format('new board: ~w~n', [NewBoard]),
+    other_player(Player, NextPlayer),
+    NewGameState = [NewBoard, NextPlayer, Phase],
     display_board(NewBoard).
 
 % Define a predicate to replace the value on the board at the specified row and column
