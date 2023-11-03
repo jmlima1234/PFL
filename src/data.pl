@@ -11,9 +11,12 @@
 
 :- dynamic board/2.
 
-:- dynamic player_value_pieces/5.
+:- dynamic player_value_pieces/4.
 
-:- dynamic last_move/1.
+:- dynamic score_counter/3.
+
+:- dynamic player_score/2.
+
 
 board(12,[
     ['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
@@ -31,27 +34,31 @@ board(12,[
 ]).
 
 % Define the current player
-current_player('Dark').
+current_player('Light').
 
 % Define the opponent player
 opponent_player('Light').
+
+% Define facts for remaining pieces (player, piece, number of pieces, size, value)
+player_value_pieces('Light', 5, 3, 1).
+player_value_pieces('Light', 4, 4, 2).
+player_value_pieces('Light', 3, 5, 3).
+player_value_pieces('Light', 2, 6, 4).
+player_value_pieces('Light', 1, 7, 6).
+player_value_pieces('Dark', 5, 3, 1).
+player_value_pieces('Dark', 4, 4, 2).
+player_value_pieces('Dark', 3, 5, 3).
+player_value_pieces('Dark', 2, 6, 4).
+player_value_pieces('Dark', 1, 7, 6).
+
+% Define facts for score counters position
+score_counter('Light', 0, 0).
+score_counter('Dark', 9, 9).
+
+player_score('Light', 0).
+player_score('Dark', 0).
 
 other_player(player1, player2).
 other_player(player2, player1).
 
 
-% Define facts for remaining pieces (player, piece, number of pieces, size, value)
-player_value_pieces('Light',l1, 5, 3, 1).
-player_value_pieces('Light',l2, 4, 4, 2).
-player_value_pieces('Light',l3, 3, 5, 3).
-player_value_pieces('Light',l4, 2, 6, 4).
-player_value_pieces('Light',l6, 1, 7, 6).
-player_value_pieces('Dark',d1, 5, 3, 1).
-player_value_pieces('Dark',d2, 4, 4, 2).
-player_value_pieces('Dark',d3, 3, 5, 3).
-player_value_pieces('Dark',d4, 2, 6, 4).
-player_value_pieces('Dark',d5, 1, 7, 6).
-
-% Define facts for score counters position
-score_counter('Light', 0, 0).
-score_counter('Dark', 0, 0).
