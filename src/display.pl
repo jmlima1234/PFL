@@ -99,6 +99,13 @@ display_winner :-
     write('No more tiles to remove. Game ends. \nPlayer Dark wins!').
 
 % Define a predicate to the start board
-start_board :-
+start_board(Board) :-
     board(_, Board),
+    display_board(Board).
+
+% Define a predicate to start the game screen
+game_start :-
+    write('PLACEMENT PHASE: \n'),
+    start_board(Board),
+    validate_piece,
     display_board(Board).

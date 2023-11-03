@@ -1,5 +1,6 @@
 :- consult('data.pl').
 :- consult('display.pl').
+:- consult('utils.pl').
 
 
 % Define a predicate to display the remaining pieces of each player
@@ -10,8 +11,6 @@ display_remaining_pieces :-
     nl,
     display_remaining_pieces(Opponent),
     nl.
-
-% Prolog
 
 display_remaining_pieces(Player) :-
     findall(Value-Count-Size, player_value_pieces(Player, Count, Size, Value), PlayerPieces),
@@ -24,15 +23,10 @@ display_players_pieces([Value-Count-Size|Rest]) :-
     format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
     display_players_pieces(Rest).
 
-% Define a predicate to start the game screen
-game_start :-
-    write('PLACEMENT PHASE: \n'),
-    start_board,
-    validate_piece.
-
-% Define a predicate to validate the user's piece selection
-validate_piece :-
-    get_move(Col1-Row1-Col2-Row2, PieceOption),
+% Define a predicate to validate the users piece selection
+validate_piece(GameState, Board, NewGameState) :-
+    [Board, Player, Phase] = GameState,
+    get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
     (PieceOption =:= 5 -> 
         write('\nInvalid piece option: 5'), nl, 
         validate_piece
@@ -41,22 +35,31 @@ validate_piece :-
         AdjustedRow2 is 11 - Row2,
         Tempcol is Col1 + 2,
         Tempcol2 is Col2 + 2,
-        place_piece(PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2)
-    ).
+        %validate_move_PP(GameState, Col1-Row1,Col2-Row2, size), !,
+        place_piece(GameState, PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2, NewGameState)
+    ).  
 
-place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
-    clear,
+% Define a predicate to select a piece option with active selection
+pieceoption(PieceOption) :-
+    (PieceOption =:= 5 -> write('Invalid piece option: 5'), nl, fail; true),
+    between(1, 6, PieceOption),
     current_player(Player),
+    player_value_pieces(Player, _, _, PieceOption), !. 
+
+place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState) :-
+    %clear,
+    [Board, Player, Phase] = GameState,
     (PieceOption =:= 5 -> Value is 6 ; Value is PieceOption),
     player_value_pieces(Player, Count, Size, Value),
     NewCount is Count - 1,
     retract(player_value_pieces(Player, Count, Size, Value)),
     assert(player_value_pieces(Player, NewCount, Size, Value)),
-    board(BoardId, OldBoard),
-    replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard),
-    retract(board(BoardId, OldBoard)),
-    assert(board(BoardId, NewBoard)),
+    replace(Board, Row1, Col2, Row2, Col1, Value, NewBoard),
+    retract(board(_, _)),
+    assert(board(Board, NewBoard)),
     assert(last_move(Row1-Col1-Col2-Row2-Player-Value)),
+    other_player(Player, NextPlayer),
+    NewGameState = [NewBoard, NextPlayer, Phase],
     display_board(NewBoard).
 
 % Define a predicate to replace the value on the board at the specified row and column
