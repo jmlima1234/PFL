@@ -55,24 +55,16 @@ set_mode :-
     get_option(1, 3, 'Mode', Option), !,
     option(Option).
 
-
-% init_state(+Size,-Board)
-init_state(12, Board):-
-    board(12, Board).
+init_state(Board):-
+    board(_, Board).
 
 % configuration(-GameState)
 % Initialize GameState with Board, first Player, phase
 configurations([Board,'Dark','Placement Phase']):-
-    isaac,
-    set_mode,
-    init_random_state,
-    choose_player(Player),
-    choose_board(Size), 
-    init_state(Size, Board).
-
-% Home screen
-home:-
     clear,
     isaac,
     blank_lines,
-    set_mode.
+    set_mode,
+    init_state(Board).
+
+

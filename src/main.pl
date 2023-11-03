@@ -14,12 +14,12 @@ start :-
     home,
     board(_, Board),
     display_board(Board),
-    validate_piece,
-    validate_piece,
-    validate_piece,
-    remove_piece(3,4),
-    remove_piece(1,8),
-    remove_piece(1,1).
+    validate_piece.
+    %validate_piece,
+    %validate_piece,
+    %remove_piece(3,4),
+    %remove_piece(1,8),
+    %remove_piece(1,1).
 
 % in_bounds(+Board,+Coordinate)
 % Checks if calculated coordinate is inside Board
@@ -95,27 +95,20 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, size) :-
     NextCol is Col + 1,
     check_possible_moves(Board, Pieces, Row, NextCol).
 
-% play/0
-% Starts the game and clears data when it ends 
-play :-
-    configurations(GameState), !,
-    game_cycle(GameState),
-    clear_data.
-
 % game_cycle(+GameState)
 % Loop that keeps the game running
+% game_cycle(GameState):-
+    % [Board, Player, Phase] = GameState,
+    % game_over(GameState, Winner), !,
+    % display_board(Board),
+    % show_winner(GameState, Winner).
 game_cycle(GameState):-
     [Board, Player, Phase] = GameState,
-    game_over(GameState, Winner), !,
-    display_board(Board),
-    show_winner(GameState, Winner).
-game_cycle(GameState):-
-    [Board, Player, Phase] = GameState,
-    Phase =\= 'Scoring Phase',
+    Phase \= 'Scoring Phase',
     display_board(Board),
     validate_piece(GameState, Board, NewGameState),
     game_cycle(NewGameState).
-game_cycle(GameState):-
+% game_cycle(GameState):-
     % [Board, Player, Phase] = GameState,
     % Phase =:= 'Scoring Phase',
     % display_board(Board),
@@ -123,3 +116,8 @@ game_cycle(GameState):-
     % choose_move_SP(NewGameState, Move),
     % move_SP(NewGameState, Move, NewGameState2), !,
     % game_cycle(NewGameState2).
+
+play :-
+    configurations(GameState), !,
+    game_cycle(GameState),
+    clear_data.

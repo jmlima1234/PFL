@@ -21,7 +21,7 @@ clear :-
 display_rows(_, []) :- nl.
 display_rows(CurrentRow, [Row|Rows]) :-
     display_row(CurrentRow, 1, Row, 0),
-    display_separator,
+    display_separator(CurrentRow),
     NextRow is CurrentRow + 1,
     display_rows(NextRow, Rows).
 
@@ -32,13 +32,13 @@ display_row(CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
         write(' | '), write(Cell), HasWritten1 is HasWritten
     ;
         % Check if the current cell is in the range specified by LastMoves
-        (member(Row1-Col1-Col2-Row2, LastMoves), Row1 =< CurrentRow, CurrentRow =< Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
+        (member(Row1-Col1-Col2-Row2, LastMoves), Row1 == CurrentRow, CurrentRow == Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
             (HasWritten == 0 ->
                 write(' | '), write(Cell), HasWritten1 is 1
             ;
                 write('   '), write(Cell), HasWritten1 is HasWritten)
         ;
-            write(' | '), write(Cell), HasWritten1 is HasWritten)
+            write(' | '), write(Cell), HasWritten1 is 0)  % Reset HasWritten to 0
     ),
 
     NextCol is CurrentCol + 1,
@@ -47,7 +47,25 @@ display_row(CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
 
 display_separator :-
     write(' |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| '), nl.
-    
+
+
+display_separator(CurrentRow) :-
+    findall(LastMove, last_move(LastMove), LastMoves),
+    display_separator_columns(1, CurrentRow, LastMoves).
+
+display_separator_columns(13, _, _) :- write('|'), nl.
+display_separator_columns(CurrentCol, CurrentRow, LastMoves) :-
+    (member(Row1-Col1-Col2-Row2, LastMoves), Row1 =< CurrentRow, CurrentRow < Row2, Col1 == CurrentCol, CurrentCol == Col2, Row1 \= Row2 ->
+        write('|     ')
+    ;
+        (CurrentCol == 1 ->
+            write(' |----')
+        ;
+            write('|-----')
+        )
+    ),
+    NextCol is CurrentCol + 1,
+    display_separator_columns(NextCol, CurrentRow, LastMoves).
 
 % Predicate to display current player
 display_current_player :-
@@ -82,3 +100,4 @@ game_start :-
     write('PLACEMENT PHASE: \n'),
     start_board(Board),
     validate_piece.
+    display_board(Board).
