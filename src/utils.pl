@@ -26,13 +26,11 @@ get_option(Min,Max,Context,Value):-
     read_number(Value),
     between(Min, Max, Value), !.
 
-% get_move(+Board,-Coordinate)
 % Unifies Coordinate with a valid coordinate given by input within the Board
 get_move(Player, Col1-Row1-Col2-Row2, Piece):-
     get_option(1, 6, 'Choose your piece value', Piece),
-    (Piece =:= 'pass' ->
+    (Piece == 'pass' ->
         assertz(passed(Player))
-    ;
     ),
     get_option(0, 9, 'Start column', Col1),
     get_option(0, 9, 'Start row', Row1),
