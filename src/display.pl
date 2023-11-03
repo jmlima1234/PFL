@@ -1,13 +1,13 @@
 :- consult('data.pl').
 
 % Define a predicate to display the board
-display_board(Board) :-
+display_board(Board, Player) :-
     nl,
     display_separator,
     display_rows(1,Board),
     nl,
-    display_current_player,
-    display_remaining_pieces,
+    display_current_player(Player),
+    display_remaining_pieces(Player),
     display_counter_position,
     display_scores.
 
@@ -69,8 +69,7 @@ display_separator_columns(CurrentCol, CurrentRow, LastMoves) :-
     display_separator_columns(NextCol, CurrentRow, LastMoves).
 
 % Predicate to display current player
-display_current_player :-
-    current_player(Player),
+display_current_player(Player) :-
     format('Current player: ~w~n', [Player]),
     nl.
 
@@ -99,13 +98,13 @@ display_winner :-
     write('No more tiles to remove. Game ends. \nPlayer Dark wins!').
 
 % Define a predicate to the start board
-start_board(Board) :-
-    board(_, Board),
-    display_board(Board).
+%start_board(Board) :-
+%    board(_, Board),
+%    display_board(Board).
 
 % Define a predicate to start the game screen
-game_start :-
-    write('PLACEMENT PHASE: \n'),
-    start_board(Board),
-    validate_piece,
-    display_board(Board).
+%game_start :-
+%    write('PLACEMENT PHASE: \n'),
+%    start_board(Board),
+%    validate_piece,
+%    display_board(Board).

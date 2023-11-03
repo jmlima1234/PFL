@@ -4,15 +4,14 @@
 
 
 % Define a predicate to display the remaining pieces of each player
-display_remaining_pieces :-
-    current_player(Player),
-    opponent_player(Opponent),
-    display_remaining_pieces(Player),
+display_remaining_pieces(Player) :-
+    display_remaining_pieces_list(Player),
     nl,
-    display_remaining_pieces(Opponent),
+    other_player(Player, Opponent),
+    display_remaining_pieces_list(Opponent),
     nl.
 
-display_remaining_pieces(Player) :-
+display_remaining_pieces_list(Player) :-
     findall(Value-Count-Size, player_value_pieces(Player, Count, Size, Value), PlayerPieces),
     keysort(PlayerPieces, SortedPlayerPieces),
     format('Remaining pieces for ~w pieces player:~n', [Player]),
@@ -25,7 +24,7 @@ display_players_pieces([Value-Count-Size|Rest]) :-
 
 % Define a predicate to validate the users piece selection
 validate_piece(GameState, Board, NewGameState) :-
-    [Board, Player, Phase] = GameState,
+    [Board, Player, _] = GameState,
     get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
     (PieceOption =:= 5 -> 
         write('\nInvalid piece option: 5'), nl, 
@@ -47,32 +46,29 @@ pieceoption(PieceOption) :-
     player_value_pieces(Player, _, _, PieceOption), !. 
 
 place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState) :-
-    %clear,
+    clear,
     [Board, Player, Phase] = GameState,
     (PieceOption =:= 5 -> Value is 6 ; Value is PieceOption),
     player_value_pieces(Player, Count, Size, Value),
     NewCount is Count - 1,
     retract(player_value_pieces(Player, Count, Size, Value)),
     assert(player_value_pieces(Player, NewCount, Size, Value)),
-    replace(Board, Row1, Col2, Row2, Col1, Value, NewBoard),
+    replace(Board, Row1, Col2, Row2, Col1, Value, NewBoard, Player),
     retract(board(_, _)),
     assert(board(Board, NewBoard)),
     assert(last_move(Row1-Col1-Col2-Row2-Player-Value)),
     other_player(Player, NextPlayer),
-    NewGameState = [NewBoard, NextPlayer, Phase],
-    display_board(NewBoard).
+    NewGameState = [NewBoard, NextPlayer, Phase].
 
 % Define a predicate to replace the value on the board at the specified row and column
-replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard) :-
+replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard, Player) :-
     ( Row1 == Row2 ->
         nth1(Row1, OldBoard, OldRow),
-        current_player(Player),
         replace_row(OldRow, Col1, Col2, Value, Player, NewRow),
         replace_list(OldBoard, Row1, NewRow, NewBoard)
      ;Col1 == Col2 ->
         transpose(OldBoard, TransposedBoard),
         nth1(Col1, TransposedBoard, OldRow),
-        current_player(Player),
         replace_row(OldRow, Row1, Row2, Value, Player, NewRow),
         replace_list(TransposedBoard, Col1, NewRow, TempBoard),
         transpose(TempBoard, NewBoard)

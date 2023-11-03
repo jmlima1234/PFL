@@ -16,7 +16,7 @@ check_all_moves([Row1-Col1-Col2-Row2-Player-Value|Rest], Row, Col) :-
         %format('MaxPoints: ~w~n', [MaxPoints]),
         handle_score_update(Player, MaxPoints),
         retract(last_move(Row1-Col1-Col2-Row2-Player-Value)),
-        remove_piece(Row1-Col1-Col2-Row2), !
+        remove_piece(Row1-Col1-Col2-Row2,Player), !
     ;
         check_all_moves(Rest, Row, Col)).
 
@@ -75,13 +75,13 @@ remove_piece(Row, Col) :-
     TempCol is Col + 1,
     check_all_moves(LastMoves, TempRow, TempCol).
 
-remove_piece(Row1-Col1-Col2-Row2) :-
+remove_piece(Row1-Col1-Col2-Row2,Player) :-
     %clear,
     board(BoardId, OldBoard),
     empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard),
     retract(board(BoardId, OldBoard)),
     assert(board(BoardId, NewBoard)),
-    display_board(NewBoard).
+    display_board(NewBoard,Player).
 
 pieces_same_line(Row1-Col1-Col2-Row2, Count) :-
     (Row1 == Row2 -> 

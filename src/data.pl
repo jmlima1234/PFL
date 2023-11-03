@@ -33,11 +33,6 @@ board(12,[
     ['  ' , ' 0 ', ' 1 ', ' 2 ', ' 3 ', ' 4 ', ' 5 ', ' 6 ', ' 7 ', ' 8 ',' 9 ', '    |']
 ]).
 
-% Define the current player
-current_player('Dark').
-
-% Define the opponent player
-opponent_player('Light').
 
 % Define facts for remaining pieces (player, piece, number of pieces, size, value)
 player_value_pieces('Light', 5, 3, 1).

@@ -4,9 +4,8 @@ clear_data :-
     retractall(name_of(_,_)),
     retractall(passed(_)),
     retractall(difficulty(_, _)),
-    retractall(board(_, _)),
-    retractall(player_value_pieces(_, _, _, _, _)),
     retractall(last_move(_)).
+
 
 read_number(X):-
     read_number_aux(X,0).
