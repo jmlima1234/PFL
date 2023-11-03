@@ -8,7 +8,8 @@ display_board(Board) :-
     nl,
     display_current_player,
     display_remaining_pieces,
-    display_counter_position.
+    display_counter_position,
+    display_scores.
 
 % Two clear lines
 blank_lines :-
@@ -73,16 +74,25 @@ display_current_player :-
     format('Current player: ~w~n', [Player]),
     nl.
 
-
 % Define a predicate to display the counter position
 display_counter_position :-
     findall(score_counter(Player, Row, Col), score_counter(Player, Row, Col), CounterPositions),
     display_counter_position(CounterPositions).
 
-display_counter_position([]).
+display_counter_position([]) :- nl.
 display_counter_position([score_counter(Player, Row, Col)|Rest]) :-
     format('Counter position for ~w player: (~w, ~w)~n', [Player, Row, Col]),
     display_counter_position(Rest).
+
+
+% Define a predicate to display the scores
+display_scores :-
+    player_score('Light', LightScore),
+    player_score('Dark', DarkScore),
+    format('Light player score: ~w~n', [LightScore]),
+    format('Dark player score: ~w~n', [DarkScore]),
+    nl.
+
 
 % Define a predicate to display the winner
 display_winner :-

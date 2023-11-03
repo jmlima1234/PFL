@@ -10,23 +10,67 @@ check_all_moves([Row1-Col1-Col2-Row2-Player-Value|Rest], Row, Col) :-
     % Check if the last move occupies the given row and column
     (occupies(Row1-Col1-Col2-Row2, Row, Col) ->
         pieces_same_line(Row1-Col1-Col2-Row2, Count),
-        format('Count: ~w~n', [Count]),
+        %format('Count: ~w~n', [Count]),
         counter_same_line(Row1-Col1-Col2-Row2, Counter),
-        format('Counter: ~w~n', [Counter]),
+        %format('Counter: ~w~n', [Counter]),
         max_points(Player-Value, Count, Counter, MaxPoints),
-        format('MaxPoints: ~w~n', [MaxPoints]),
-        retract(last_move(Row1-Col1-Col2-Row2-Player-Value)),  % Remove the piece from last_move/1 if it's found
+        %format('MaxPoints: ~w~n', [MaxPoints]),
+        handle_score_update(Player, MaxPoints),
+        retract(last_move(Row1-Col1-Col2-Row2-Player-Value)),
         remove_piece(Row1-Col1-Col2-Row2), !
     ;
-        check_all_moves(Rest, Row, Col)).  % Continue with the rest of the list
+        check_all_moves(Rest, Row, Col)).
 
-% Helper function to check if a last move occupies a given row and column
+
+handle_score_update(Player, NewScore) :-
+    % Find the current score for the player
+    player_score(Player, CurrentScore),
+
+    % Calculate the difference between the new score and the current score
+    ScoreDiff is NewScore - CurrentScore,
+
+    (ScoreDiff >= 0 ->
+        format('You have earned ~w points.~nHow many points do you want to add (where do you want to move your counter to)? ', [ScoreDiff]),
+        read_number(PointsToAdd),
+        (PointsToAdd >= 1, PointsToAdd =< ScoreDiff ->
+            FinalScore is CurrentScore + PointsToAdd
+        ;
+            write('Invalid number of points. Please enter a number between 1 and the number of points you earned.'),
+            handle_score_update(Player, NewScore)
+        )
+    ;
+        FinalScore is NewScore
+    ),
+
+    % Update the player's score
+    retract(player_score(Player, CurrentScore)),
+    assert(player_score(Player, FinalScore)),
+
+    % Update the player's score counter
+    update_score_counter(Player, ScoreDiff).
+
+update_score_counter(Player, ScoreDiff) :-
+
+    score_counter(Player, Row, Col),
+
+    (Player == 'Dark' ->
+        NewRow is Row - ScoreDiff,
+        NewCol is Col
+    ;
+        TotalPoints is Row * 10 + Col,
+        NewTotalPoints is TotalPoints + ScoreDiff,
+        NewRow is NewTotalPoints div 10,
+        NewCol is NewTotalPoints mod 10
+    ),
+
+    retract(score_counter(Player, Row, Col)),
+    assert(score_counter(Player, NewRow, NewCol)).
+
 occupies(Row1-Col1-Col2-Row2, Row, Col) :-
     between(Row1, Row2, Row),
     between(Col1, Col2, Col).
 
 remove_piece(Row, Col) :-
-    % Iterate through the last moves
     findall(LastMove, last_move(LastMove), LastMoves),
     TempRow is Row + 1,
     TempCol is Col + 1,
@@ -42,11 +86,11 @@ remove_piece(Row1-Col1-Col2-Row2) :-
 
 pieces_same_line(Row1-Col1-Col2-Row2, Count) :-
     (Row1 == Row2 -> 
-        findall(_, (last_move(Row-_-_-_-_-_), Row == Row1), List),
+        findall(_, (last_move(TempRow1-_-_-TempRow2-_-_), TempRow1 =< Row1, Row1 =< TempRow2), List),
         length(List, TempCount),
         Count is TempCount - 1
     ;Col1 == Col2 ->
-        findall(_, (last_move(_-Col-_-_-_-_), Col == Col1), List),
+        findall(_, (last_move(_-TempCol1-TempCol2-_-_-_), TempCol1 =< Col1, Col1 =< TempCol2), List),
         length(List, TempCount),
         Count is TempCount - 1
     ).

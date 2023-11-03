@@ -15,6 +15,8 @@
 
 :- dynamic score_counter/3.
 
+:- dynamic player_score/2.
+
 
 board(12,[
     ['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
@@ -32,7 +34,7 @@ board(12,[
 ]).
 
 % Define the current player
-current_player('Dark').
+current_player('Light').
 
 % Define the opponent player
 opponent_player('Light').
@@ -52,6 +54,9 @@ player_value_pieces('Dark', 1, 7, 6).
 % Define facts for score counters position
 score_counter('Light', 0, 0).
 score_counter('Dark', 9, 9).
+
+player_score('Light', 0).
+player_score('Dark', 0).
 
 other_player(player1, player2).
 other_player(player2, player1).
