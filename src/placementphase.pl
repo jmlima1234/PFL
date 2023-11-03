@@ -11,13 +11,16 @@ display_remaining_pieces :-
     display_remaining_pieces(Opponent),
     nl.
 
+% Prolog
+
 display_remaining_pieces(Player) :-
-    findall(player_value_pieces(Player, Count, Size, Value), player_value_pieces(Player, Count, Size, Value), PlayerPieces),
+    findall(Value-Count-Size, player_value_pieces(Player, Count, Size, Value), PlayerPieces),
+    keysort(PlayerPieces, SortedPlayerPieces),
     format('Remaining pieces for ~w pieces player:~n', [Player]),
-    display_players_pieces(PlayerPieces).
+    display_players_pieces(SortedPlayerPieces).
 
 display_players_pieces([]).
-display_players_pieces([player_value_pieces(_, Count, Size, Value)|Rest]) :-
+display_players_pieces([Value-Count-Size|Rest]) :-
     format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
     display_players_pieces(Rest).
 
@@ -30,15 +33,17 @@ game_start :-
 % Define a predicate to validate the user's piece selection
 validate_piece :-
     get_move(Col1-Row1-Col2-Row2, PieceOption),
-    pieceoption(PieceOption),
-    place_piece(PieceOption, Row1, Col1, Col2, Row2).
-
-% Define a predicate to select a piece option with active selection
-pieceoption(PieceOption) :-
-    (PieceOption =:= 5 -> write('Invalid piece option: 5'), nl, fail; true),
-    between(1, 6, PieceOption),
-    current_player(Player),
-    player_value_pieces(Player, _, _, PieceOption), !.  % Use PieceOption directly
+    (PieceOption =:= 5 -> 
+        write('Invalid piece option: 5'), nl, 
+        validate_piece
+    ;
+        AdjustedRow1 is 11 - Row1,
+        AdjustedRow2 is 11 - Row2,
+        Tempcol is Col1 + 2,
+        Tempcol2 is Col2 + 2,
+        pieceoption(PieceOption),
+        place_piece(PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2)
+    ).
 
 place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
     clear,
@@ -49,14 +54,10 @@ place_piece(PieceOption, Row1, Col1, Col2, Row2) :-
     retract(player_value_pieces(Player, Count, Size, Value)),
     assert(player_value_pieces(Player, NewCount, Size, Value)),
     board(BoardId, OldBoard),
-    Temprow is Row1 + 1,
-    Temprow2 is Row2 + 1,
-    Tempcol is Col1 + 1,
-    Tempcol2 is Col2 + 1,
-    replace(OldBoard, Temprow, Tempcol2, Temprow2, Tempcol, Value, NewBoard),
+    replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard),
     retract(board(BoardId, OldBoard)),
     assert(board(BoardId, NewBoard)),
-    assert(last_move(Temprow-Tempcol-Tempcol2-Temprow2)),
+    assert(last_move(Row1-Col1-Col2-Row2-Player-Value)),
     display_board(NewBoard).
 
 % Define a predicate to replace the value on the board at the specified row and column

@@ -13,6 +13,8 @@
 
 :- dynamic player_value_pieces/4.
 
+:- dynamic score_counter/3.
+
 
 board(12,[
     ['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
@@ -49,7 +51,7 @@ player_value_pieces('Dark', 1, 7, 6).
 
 % Define facts for score counters position
 score_counter('Light', 0, 0).
-score_counter('Dark', 0, 0).
+score_counter('Dark', 9, 9).
 
 other_player(player1, player2).
 other_player(player2, player1).

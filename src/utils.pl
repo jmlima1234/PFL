@@ -22,10 +22,10 @@ get_option(Min,Max,Context,Value):-
 % Unifies Coordinate with a valid coordinate given by input within the Board
 get_move(Col1-Row1-Col2-Row2, Piece):-
     get_option(1, 6, 'Choose your piece value', Piece),
-    get_option(1, 10, 'Start column', Col1),
-    get_option(1, 10, 'Start row', Row1),
-    get_option(1, 10, 'Destination column', Col2),
-    get_option(1, 10, 'Destination row', Row2).
+    get_option(0, 9, 'Start column', Col1),
+    get_option(0, 9, 'Start row', Row1),
+    get_option(0, 9, 'Destination column', Col2),
+    get_option(0, 9, 'Destination row', Row2).
 
 % put_piece(+Board,+Coordinate,+Piece,-NewBoard).
 put_piece(Board, Col-Row, Piece, NewBoard) :-

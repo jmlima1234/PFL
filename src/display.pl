@@ -32,13 +32,13 @@ display_row(CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
         write(' | '), write(Cell), HasWritten1 is HasWritten
     ;
         % Check if the current cell is in the range specified by LastMoves
-        (member(Row1-Col1-Col2-Row2, LastMoves), Row1 == CurrentRow, CurrentRow == Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
+        (member(Row1-Col1-Col2-Row2-Player-Value, LastMoves), Row1 == CurrentRow, CurrentRow == Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
             (HasWritten == 0 ->
                 write(' | '), write(Cell), HasWritten1 is 1
             ;
                 write('   '), write(Cell), HasWritten1 is HasWritten)
         ;
-            write(' | '), write(Cell), HasWritten1 is 0)  % Reset HasWritten to 0
+            write(' | '), write(Cell), HasWritten1 is 0)
     ),
 
     NextCol is CurrentCol + 1,
@@ -55,7 +55,7 @@ display_separator(CurrentRow) :-
 
 display_separator_columns(13, _, _) :- write('|'), nl.
 display_separator_columns(CurrentCol, CurrentRow, LastMoves) :-
-    (member(Row1-Col1-Col2-Row2, LastMoves), Row1 =< CurrentRow, CurrentRow < Row2, Col1 == CurrentCol, CurrentCol == Col2, Row1 \= Row2 ->
+    (member(Row1-Col1-Col2-Row2-Player-Value, LastMoves), Row1 =< CurrentRow, CurrentRow < Row2, Col1 == CurrentCol, CurrentCol == Col2, Row1 \= Row2 ->
         write('|     ')
     ;
         (CurrentCol == 1 ->
@@ -81,9 +81,7 @@ display_counter_position :-
 
 display_counter_position([]).
 display_counter_position([score_counter(Player, Row, Col)|Rest]) :-
-    Score is Row*10 + Col,
     format('Counter position for ~w player: (~w, ~w)~n', [Player, Row, Col]),
-    format('Score for ~w player: ~w~n~n', [Player, Score]),
     display_counter_position(Rest).
 
 % Define a predicate to display the winner
