@@ -34,14 +34,13 @@ game_start :-
 validate_piece :-
     get_move(Col1-Row1-Col2-Row2, PieceOption),
     (PieceOption =:= 5 -> 
-        write('Invalid piece option: 5'), nl, 
+        write('\nInvalid piece option: 5'), nl, 
         validate_piece
     ;
         AdjustedRow1 is 11 - Row1,
         AdjustedRow2 is 11 - Row2,
         Tempcol is Col1 + 2,
         Tempcol2 is Col2 + 2,
-        pieceoption(PieceOption),
         place_piece(PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2)
     ).
 
