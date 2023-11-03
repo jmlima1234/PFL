@@ -9,14 +9,14 @@
 
 
 % start_game
-start :-
-    retractall(last_move(_)),
-    home,
-    board(_, Board),
-    display_board(Board),
-    validate_piece,
-    validate_piece,
-    remove_piece(6,1).
+%start :-
+%    retractall(last_move(_)),
+%    home,
+%    board(_, Board),
+%    display_board(Board),
+%    validate_piece,
+%    validate_piece,
+%    remove_piece(6,1).
 
 % in_bounds(+Board,+Coordinate)
 % Checks if calculated coordinate is inside Board
@@ -27,10 +27,10 @@ check_bounds(Board, Col-Row) :-
 
 % validate_move(+Board,+CoordsOrigin,+CoordsDestination)
 % Checks if the move is valid or not on placement phase
-validate_move_PP(GameState, ColI-RowI, ColF-RowF, -1) :-
+validate_move_PP(_, _, _, -1) :-
     write('Valid Move!').
 validate_move_PP(GameState, ColI-RowI,ColF-RowF, size) :-
-    [Board, Player, Phase] = GameState,
+    [Board, Player, _] = GameState,
     \+passed(Player),
     check_bounds(Board, ColI-RowI), check_bounds(Board, ColF-RowF),
     board(Board),
@@ -71,7 +71,7 @@ check_possible_moves(Board, Player, Pieces, Row, 10, Moves, size) :-
     NewRow is Row + 1,
     check_possible_moves(Board, Player, Pieces, NewRow, 1, Moves, size).
 
-check_possible_moves(Board, Player, Pieces, 10, 10, Moves, size) :-
+check_possible_moves(_, _, _, 10, 10, _, size) :-
     write('No more valid moves, the player should pass! \n').
 
 check_possible_moves(Board, Player, Pieces, Row, Col, Moves, size) :-
@@ -102,7 +102,7 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, size) :-
 game_cycle(GameState):-
     [Board, Player, Phase] = GameState,
     Phase \= 'Scoring Phase',
-    display_board(Board),
+    display_board(Board, Player),
     validate_piece(GameState, Board, NewGameState),
     game_cycle(NewGameState).
 % game_cycle(GameState):-

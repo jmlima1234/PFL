@@ -62,6 +62,7 @@ init_state(Board):-
 % Initialize GameState with Board, first Player, phase
 configurations([Board,'Dark','Placement Phase']):-
     clear,
+    clear_data,
     isaac,
     blank_lines,
     set_mode,
