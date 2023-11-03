@@ -32,7 +32,7 @@ validate_move_PP(GameState, ColI-RowI, ColF-RowF, -1) :-
 validate_move_PP(GameState, ColI-RowI,ColF-RowF, size) :-
     [Board, Player, Phase] = GameState,
     \+passed(Player),
-    check_bounds(ColI-RowI), check_bounds(ColF-RowF),
+    check_bounds(Board, ColI-RowI), check_bounds(Board, ColF-RowF),
     board(Board),
     nth1(RowI, Board, RowList),
     nth1(ColI, RowList, Cell),

@@ -33,7 +33,7 @@ display_row(CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
         write(' | '), write(Cell), HasWritten1 is HasWritten
     ;
         % Check if the current cell is in the range specified by LastMoves
-        (member(Row1-Col1-Col2-Row2-Player-Value, LastMoves), Row1 == CurrentRow, CurrentRow == Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
+        (member(Row1-Col1-Col2-Row2-_-_, LastMoves), Row1 == CurrentRow, CurrentRow == Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
             (HasWritten == 0 ->
                 write(' | '), write(Cell), HasWritten1 is 1
             ;
@@ -56,7 +56,7 @@ display_separator(CurrentRow) :-
 
 display_separator_columns(13, _, _) :- write('|'), nl.
 display_separator_columns(CurrentCol, CurrentRow, LastMoves) :-
-    (member(Row1-Col1-Col2-Row2-Player-Value, LastMoves), Row1 =< CurrentRow, CurrentRow < Row2, Col1 == CurrentCol, CurrentCol == Col2, Row1 \= Row2 ->
+    (member(Row1-Col1-Col2-Row2-_-_, LastMoves), Row1 =< CurrentRow, CurrentRow < Row2, Col1 == CurrentCol, CurrentCol == Col2, Row1 \= Row2 ->
         write('|     ')
     ;
         (CurrentCol == 1 ->
@@ -107,5 +107,5 @@ start_board(Board) :-
 game_start :-
     write('PLACEMENT PHASE: \n'),
     start_board(Board),
-    validate_piece.
+    validate_piece,
     display_board(Board).

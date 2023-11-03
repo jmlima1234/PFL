@@ -3,8 +3,7 @@
 :- consult('placementphase.pl').
 
 
-check_all_moves([], _, _) :-
-    write('false'), !.
+check_all_moves([], _, _) :- !.
 
 check_all_moves([Row1-Col1-Col2-Row2-Player-Value|Rest], Row, Col) :-
     % Check if the last move occupies the given row and column
@@ -13,7 +12,7 @@ check_all_moves([Row1-Col1-Col2-Row2-Player-Value|Rest], Row, Col) :-
         %format('Count: ~w~n', [Count]),
         counter_same_line(Row1-Col1-Col2-Row2, Counter),
         %format('Counter: ~w~n', [Counter]),
-        max_points(Player-Value, Count, Counter, MaxPoints),
+        max_points(Value, Count, Counter, MaxPoints),
         %format('MaxPoints: ~w~n', [MaxPoints]),
         handle_score_update(Player, MaxPoints),
         retract(last_move(Row1-Col1-Col2-Row2-Player-Value)),
@@ -106,9 +105,13 @@ counter_same_line(Row1-Col1-Col2-Row2, Counter) :-
         length(List, Counter)
     ).
 
-max_points(Player-Value, Count, Counter, MaxPoints) :-
-    Multiplier is 2 ^ Counter,  % Calculate the multiplier based on the number of counters
-    MaxPoints is Value * Count * Multiplier.  % Calculate the points
+max_points(Value, Count, Counter, MaxPoints) :-
+    CMultiplier is 2 ^ Counter,  % Calculate the multiplier based on the number of counters
+    (Count == 0 ->
+        MaxPoints is Value*Count  % If Count is 0, MaxPoints is the Value of the piece
+    ;
+        MaxPoints is Value * Count * CMultiplier  % Calculate the points
+    ).
 
 % Define a predicate to replace the value on the board at the specified row and column
 empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard) :-

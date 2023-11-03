@@ -34,7 +34,7 @@ board(12,[
 ]).
 
 % Define the current player
-current_player('Light').
+current_player('Dark').
 
 % Define the opponent player
 opponent_player('Light').
@@ -58,7 +58,7 @@ score_counter('Dark', 9, 9).
 player_score('Light', 0).
 player_score('Dark', 0).
 
-other_player(player1, player2).
-other_player(player2, player1).
+other_player('Dark', 'Light').
+other_player('Light', 'Dark').
 
 
