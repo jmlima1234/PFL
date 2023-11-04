@@ -29,27 +29,25 @@ check_bounds(Board, Col-Row) :-
 % Checks if the move is valid or not on the placement phase
 validate_move_PP(_, _, _, -1) :-
     write('Valid Move!').
-validate_move_PP(GameState, ColI-RowI, ColF-RowF, size) :-
-    write('Started validation'), nl,
+validate_move_PP(GameState, ColI-RowI, ColF-RowF, Size) :-
     [Board, Player, _] = GameState,
     \+passed(Player),
-    write('Player didnt pass'), nl,
     check_bounds(Board, ColI-RowI),
     check_bounds(Board, ColF-RowF),
     nth1(RowI, Board, RowList),
     nth1(ColI, RowList, Cell),
     (Cell == ' - ' ->
         (
-            (ColF - ColI == size ->
+            (ColF - ColI == Size ->
                 Row is RowI + 1,
-                NewSize is size - 1,
+                NewSize is Size - 1,
                 validate_move_PP(GameState, ColI-ColF, Row-RowF, NewSize)
-            ; RowF - RowI == size ->
+            ; RowF - RowI == Size ->
                 Col is ColI + 1,
-                NewSize is size - 1,
+                NewSize is Size - 1,
                 validate_move_PP(GameState, Col-RowI, ColF-RowF, NewSize)
             ; 
-                write('Invalid Move! Size is incorrect'),
+                write('Invalid Move! Size is incorrect'), nl,
                 validate_piece(GameState, Board, NewGameState)
             )
         )
