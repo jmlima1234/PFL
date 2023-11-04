@@ -49,7 +49,14 @@ put_piece(Board, Col-Row, Piece, NewBoard) :-
     replace(Row, NewLine, Board, NewBoard).
 
 
-choose_piece_to_remove(Row, Col) :-
-    get_option(0, 9, 'Choose a row', Row),
-    get_option(0, 9, 'Choose a column', Col).
+choose_piece_to_remove(PossibleMoves, Index) :-
+    write('Your possible moves are: '), nl,
+    print_list(PossibleMoves, 1),
+    length(PossibleMoves, Length),
+    get_option(1, Length, 'Choose a piece to remove', Index).
 
+print_list([], _).
+print_list([H|T], Index) :-
+    write(Index), write(' - '), write(H), nl,
+    NewIndex is Index + 1,
+    print_list(T, NewIndex).
