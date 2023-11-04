@@ -48,3 +48,8 @@ put_piece(Board, Col-Row, Piece, NewBoard) :-
     replace(Col, Piece, Line, NewLine),
     replace(Row, NewLine, Board, NewBoard).
 
+
+choose_piece_to_remove(Row, Col) :-
+    get_option(0, 9, 'Choose a row', Row),
+    get_option(0, 9, 'Choose a column', Col).
+
