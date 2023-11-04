@@ -3,85 +3,63 @@
 :- consult('placementphase.pl').
 
 
-check_all_moves([], _, _) :- !.
-
-check_all_moves([Row1-Col1-Col2-Row2-Player-Value|Rest], Row, Col) :-
-    % Check if the last move occupies the given row and column
-    (occupies(Row1-Col1-Col2-Row2, Row, Col) ->
-        pieces_same_line(Row1-Col1-Col2-Row2, Count),
-        %format('Count: ~w~n', [Count]),
-        counter_same_line(Row1-Col1-Col2-Row2, Counter),
-        %format('Counter: ~w~n', [Counter]),
-        max_points(Value, Count, Counter, MaxPoints),
-        %format('MaxPoints: ~w~n', [MaxPoints]),
-        handle_score_update(Player, MaxPoints),
-        retract(last_move(Row1-Col1-Col2-Row2-Player-Value)),
-        remove_piece(Row1-Col1-Col2-Row2,Player), !
+% Define a predicate to start scoring phase
+scoringphase_start(GameState, NewGameState) :-
+    [_, Player, _] = GameState,
+    check_possible_removal(GameState, PossibleMoves),
+    choose_piece_to_remove(PossibleMoves, Index),
+    nth1(Index, PossibleMoves, Move),
+    valid_removal(Move, Valid, Player),
+    (Valid == 1 ->
+        remove_piece(Index, GameState, NewGameState)
     ;
-        check_all_moves(Rest, Row, Col)).
+        scoringphase_start(GameState, NewGameState)
+    ).
 
+check_possible_removal(GameState, PossibleMoves) :-
+    [_, Player, _] = GameState,
+    findall(Row1-Col1-Col2-Row2-PlayerP-Value, (last_move(Row1-Col1-Col2-Row2-PlayerP-Value), PlayerP == Player, valid_removal(Row1-Col1-Col2-Row2, 1, Player)), PossibleMoves).
 
-handle_score_update(Player, NewScore) :-
-    % Find the current score for the player
-    player_score(Player, CurrentScore),
-
-    % Calculate the difference between the new score and the current score
-    ScoreDiff is NewScore - CurrentScore,
-
-    (ScoreDiff >= 0 ->
-        format('You have earned ~w points.~nHow many points do you want to add (where do you want to move your counter to)? ', [ScoreDiff]),
-        read_number(PointsToAdd),
-        (PointsToAdd >= 1, PointsToAdd =< ScoreDiff ->
-            FinalScore is CurrentScore + PointsToAdd
-        ;
-            write('Invalid number of points. Please enter a number between 1 and the number of points you earned.'),
-            handle_score_update(Player, NewScore)
-        )
+valid_removal(Row1-Col1-Col2-Row2-PlayerP-Value, Valid, Player) :-
+    (last_piece_removed(_-_-_-_-Player-ValueR) ->
+        (Value >= ValueR -> Valid = 1; Valid = 0),
+        retract(last_piece_removed(_-_-_-_-Player-ValueR)),
+        assert(last_piece_removed(Row1-Col1-Col2-Row2-PlayerP-Value))
     ;
-        FinalScore is NewScore
+        assert(last_piece_removed(Row1-Col1-Col2-Row2-PlayerP-Value)),
+        Valid = 1;
     ),
 
-    % Update the player's score
-    retract(player_score(Player, CurrentScore)),
-    assert(player_score(Player, FinalScore)),
+    score_counter('Light', Row3, Col3),
+    score_counter('Dark', Row4, Col4),
 
-    % Update the player's score counter
-    update_score_counter(Player, ScoreDiff).
-
-update_score_counter(Player, ScoreDiff) :-
-
-    score_counter(Player, Row, Col),
-
-    (Player == 'Dark' ->
-        NewRow is Row - ScoreDiff,
-        NewCol is Col
+    (Row1 == Row2 ->
+        (Col1 =< Col3, Col3 =< Col2 -> Valid = 0; true),
+        (Col1 =< Col4, Col4 =< Col2 -> Valid = 0; true)
     ;
-        TotalPoints is Row * 10 + Col,
-        NewTotalPoints is TotalPoints + ScoreDiff,
-        NewRow is NewTotalPoints div 10,
-        NewCol is NewTotalPoints mod 10
-    ),
+        (Row1 =< Row3, Row3 =< Row2 -> Valid = 0; true),
+        (Row1 =< Row4, Row4 =< Row2 -> Valid = 0; true)
+    ).
 
-    retract(score_counter(Player, Row, Col)),
-    assert(score_counter(Player, NewRow, NewCol)).
-
-occupies(Row1-Col1-Col2-Row2, Row, Col) :-
-    between(Row1, Row2, Row),
-    between(Col1, Col2, Col).
-
-remove_piece(Row, Col) :-
-    findall(LastMove, last_move(LastMove), LastMoves),
-    TempRow is Row + 1,
-    TempCol is Col + 1,
-    check_all_moves(LastMoves, TempRow, TempCol).
-
-remove_piece(Row1-Col1-Col2-Row2,Player) :-
-    %clear,
-    board(BoardId, OldBoard),
-    empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard),
-    retract(board(BoardId, OldBoard)),
-    assert(board(BoardId, NewBoard)),
-    display_board(NewBoard,Player).
+remove_piece(Index, GameState, NewGameState) :-
+    nth1(Index, PossibleMoves, Move),
+    removal_operation(Move, GameState, NewGameState),
+    [Board, Player, Phase] = GameState,
+    clear,
+    empty_cell(Board, Row1, Col1, Row2, Col2, NewBoard),
+    retract(board(_, _)),
+    assert(board(Board, NewBoard)),
+    other_player(Player, NextPlayer),
+    NewGameState = [NewBoard, NextPlayer, Phase],
+    winning_condition(NewGameState).
+    
+removal_operation(Row1-Col1-Col2-Row2-PlayerP-Value, GameState, NewGameState) :-
+    [_, Player, _] = GameState,
+    pieces_same_line(Row1-Col1-Col2-Row2, Count),
+    counter_same_line(Row1-Col1-Col2-Row2, Counter),
+    max_points(Value, Count, Counter, MaxPoints),
+    handle_score_update(Player, MaxPoints),
+    retract(last_move(Row1-Col1-Col2-Row2-PlayerP-Value)).
 
 pieces_same_line(Row1-Col1-Col2-Row2, Count) :-
     (Row1 == Row2 -> 
@@ -113,7 +91,46 @@ max_points(Value, Count, Counter, MaxPoints) :-
         MaxPoints is Value * Count * CMultiplier  % Calculate the points
     ).
 
-% Define a predicate to replace the value on the board at the specified row and column
+handle_score_update(Player, NewScore) :-
+    % Find the current score for the player
+    player_score(Player, CurrentScore),
+
+    % Calculate the difference between the new score and the current score
+    ScoreDiff is NewScore - CurrentScore,
+
+    (ScoreDiff >= 0 ->
+        format('You have earned ~w points.~nHow many points do you want to add (where do you want to move your counter to)? ', [ScoreDiff]),
+        read_number(PointsToAdd),
+        (PointsToAdd >= 1, PointsToAdd =< ScoreDiff ->
+            FinalScore is CurrentScore + PointsToAdd
+        ;
+            write('Invalid number of points. Please enter a number between 1 and the number of points you earned.'),
+            handle_score_update(Player, NewScore)
+        )
+    ;
+        FinalScore is NewScore
+    ),
+    retract(player_score(Player, CurrentScore)),
+    assert(player_score(Player, FinalScore)),
+
+    update_score_counter(Player, ScoreDiff).
+
+update_score_counter(Player, ScoreDiff) :-
+    score_counter(Player, Row, Col),
+
+    (Player == 'Dark' ->
+        NewRow is Row - ScoreDiff,
+        NewCol is Col
+    ;
+        TotalPoints is Row * 10 + Col,
+        NewTotalPoints is TotalPoints + ScoreDiff,
+        NewRow is NewTotalPoints div 10,
+        NewCol is NewTotalPoints mod 10
+    ),
+
+    retract(score_counter(Player, Row, Col)),
+    assert(score_counter(Player, NewRow, NewCol)).
+
 empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard) :-
     ( Row1 == Row2 ->
         nth1(Row1, OldBoard, OldRow),
@@ -127,8 +144,34 @@ empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard) :-
         transpose(TempBoard, NewBoard)
     ).
 
-
-% Define a predicate to replace a range of values at the specified indices in a row
 replace_row(Row, Col1, Col2, NewRow) :-
     length(Row, Length),
     findall(Y, (between(1, Length, I), (I >= Col1, I =< Col2 -> Y = ' - '; nth1(I, Row, Y))), NewRow).
+
+winning_condition(NewGameState) :-
+    [Board, Player, _] = NewGameState,
+    other_player(Player, NextPlayer),
+    check_possible_removal(NewGameState, PossibleMoves),
+    player_score(Player, Score),
+    player_score(NextPlayer, NextScore),
+    (Score == 100 -> Winner = Player
+    ; NextScore == 100 -> Winner = NextPlayer
+    ; PossibleMoves == [] -> Winner = NextPlayer
+    ; fail),
+    NewGameState = [Board, Winner, 'game_over'].
+
+game_over(GameState) :-
+    [_, Winner, _] = GameState,
+    display_board(GameState),
+    format('No more tiles to remove. Game Over.~nPlayer ~w wins!', [Winner]).
+
+
+check_bot_removal(GameState, Move) :-
+    check_possible_removal(GameState, PossibleMoves),
+    length(PossibleMoves, Length),
+    random(1, Length, Index),
+    nth1(Index, PossibleMoves, Move).
+
+
+
+

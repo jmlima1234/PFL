@@ -1,7 +1,8 @@
 :- consult('data.pl').
 
 % Define a predicate to display the board
-display_board(Board, Player) :-
+display_board(GameState) :-
+    [Board, Player, _] = GameState,
     nl,
     display_separator,
     display_rows(1,Board),

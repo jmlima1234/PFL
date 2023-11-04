@@ -107,9 +107,9 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, size) :-
     % display_board(Board),
     % show_winner(GameState, Winner).
 game_cycle(GameState):-
-    [Board, Player, Phase] = GameState,
+    [Board, _, Phase] = GameState,
     Phase \= 'Scoring Phase',
-    display_board(Board, Player),
+    display_board(GameState),
     validate_piece(GameState, Board, NewGameState),
     game_cycle(NewGameState).
 % game_cycle(GameState):-
