@@ -25,16 +25,31 @@ display_players_pieces([Value-Count-Size|Rest]) :-
 % Define a predicate to validate the users piece selection
 validate_piece(GameState, Board, NewGameState) :-
     [Board, Player, _] = GameState,
+    write('Waiting for move'), nl,
     get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
-    (PieceOption =:= 5 -> 
-        write('\nInvalid piece option: 5'), nl, 
-        validate_piece
+    format('Move: ~w, ~w, ~w, ~w, ~w', [PieceOption, Col1, Col2, Row1, Row2]),
+    write('Received move!'), nl,
+    (PieceOption == 5 -> 
+        write('Invalid piece option: 5'), nl, 
+        validate_piece(GameState, Board, NewGameState)
+    ; PieceOption == "pass" ->
+        other_player(Player, NextPlayer),
+        (passed(NextPlayer) ->
+            NewGameState = [Board, NextPlayer, 'Scoring Phase'],
+            write('Placement phase is over! Going for the scoring phase!'), nl
+        ;
+            NewGameState = [Board, NextPlayer, 'Placement Phase']
+        )
     ;
+        write('CheckPoint'), nl,
         AdjustedRow1 is 11 - Row1,
         AdjustedRow2 is 11 - Row2,
         Tempcol is Col1 + 2,
         Tempcol2 is Col2 + 2,
-        %validate_move_PP(GameState, Col1-Row1,Col2-Row2, size), !,
+        write('CheckPoint2'), nl,
+        player_value_pieces(Player, count, size, PieceOption),
+        write('before validate'),
+        validate_move_PP(GameState, Col1-Row1,Col2-Row2, size), !,
         place_piece(GameState, PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2, NewGameState)
     ).  
 

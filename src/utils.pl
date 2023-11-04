@@ -25,21 +25,31 @@ get_option(Min,Max,Context,Value):-
     read_number(Value),
     between(Min, Max, Value), !.
 
-% Unifies Coordinate with a valid coordinate given by input within the Board
-% Prolog
-
-% Prolog
-
-get_move(Player, Col1-Row1-Col2-Row2, Piece):-
-    get_option(1, 6, 'Choose your piece value', Piece),
+get_move(Player, Col1-Row1-Col2-Row2, Piece) :-
+    get_piece_or_pass(1, 6, 'Do you want to type a value', Piece), % Get the piece value or 'pass'
     (Piece == 'pass' ->
         assertz(passed(Player))
-    ;   true
-    ),
-    get_option(0, 9, 'Start column', Col1),
-    get_option(0, 9, 'Start row', Row1),
-    get_option(0, 9, 'Destination column', Col2),
-    get_option(0, 9, 'Destination row', Row2).
+    ;   get_option(0, 9, 'Start column', Col1),
+        get_option(0, 9, 'Start row', Row1),
+        get_option(0, 9, 'Destination column', Col2),
+        get_option(0, 9, 'Destination row', Row2)
+    ).
+
+get_piece_or_pass(Min,Max,Context,Value) :-
+    format(' ~a between ~d and ~d or type "pass"? ', [Context, Min, Max]),
+    nl,
+    read_line(String),    
+    (String == "pass" ->
+        Value = 'pass'
+    ; String == "value" ->  
+        format('~a between ~d and ~d: ', [Context, Min, Max]),
+        nl,
+        repeat,
+        read_number(Value),
+        between(Min, Max, Value), !
+    ;   write('Invalid input. Please enter a numeric piece value or "pass".\n'),
+        get_piece_or_pass(1, 6, 'Do you want to type a value', Piece)
+    ).
 
 % put_piece(+Board,+Coordinate,+Piece,-NewBoard).
 put_piece(Board, Col-Row, Piece, NewBoard) :-

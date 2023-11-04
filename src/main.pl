@@ -25,31 +25,38 @@ check_bounds(Board, Col-Row) :-
     between(1, Size, Col),
     between(1, Size, Row).
 
-% validate_move(+Board,+CoordsOrigin,+CoordsDestination)
-% Checks if the move is valid or not on placement phase
+% validate_move(+Board, +CoordsOrigin, +CoordsDestination)
+% Checks if the move is valid or not on the placement phase
 validate_move_PP(_, _, _, -1) :-
     write('Valid Move!').
-validate_move_PP(GameState, ColI-RowI,ColF-RowF, size) :-
+validate_move_PP(GameState, ColI-RowI, ColF-RowF, size) :-
+    write('Started validation'), nl,
     [Board, Player, _] = GameState,
     \+passed(Player),
-    check_bounds(Board, ColI-RowI), check_bounds(Board, ColF-RowF),
-    board(Board),
+    write('Player didnt pass'), nl,
+    check_bounds(Board, ColI-RowI),
+    check_bounds(Board, ColF-RowF),
     nth1(RowI, Board, RowList),
     nth1(ColI, RowList, Cell),
-    Cell = ' - ',
-    (
-        (ColF - ColI =:= size ->
-            Row is RowI + 1,
-            NewSize is size - 1,
-            validate_move_PP(GameState, ColI-ColF, Row-RowF, NewSize)
-        ; RowF - RowI =:= size ->
-            Col is ColI + 1,
-            NewSize is size - 1,
-            validate_move_PP(GameState, Col-RowI, ColF-RowF, NewSize)
-        ; true
+    (Cell == ' - ' ->
+        (
+            (ColF - ColI == size ->
+                Row is RowI + 1,
+                NewSize is size - 1,
+                validate_move_PP(GameState, ColI-ColF, Row-RowF, NewSize)
+            ; RowF - RowI == size ->
+                Col is ColI + 1,
+                NewSize is size - 1,
+                validate_move_PP(GameState, Col-RowI, ColF-RowF, NewSize)
+            ; 
+                write('Invalid Move! Size is incorrect'),
+                validate_piece(GameState, Board, NewGameState)
+            )
         )
-    ),
-    write('Invalid Move! \n').  
+    ; % Cell is not empty
+        write('Invalid Move! Cell is not empty.\n')
+    ).
+
 
 % Check if there are any possible moves for the current player
 has_possible_moves(GameState, Moves) :-
@@ -115,6 +122,6 @@ game_cycle(GameState):-
     % game_cycle(NewGameState2).
 
 play :-
+    clear_data,
     configurations(GameState), !,
-    game_cycle(GameState),
-    clear_data.
+    game_cycle(GameState).
