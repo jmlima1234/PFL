@@ -24,7 +24,12 @@ display_players_pieces([Value-Count-Size|Rest]) :-
 
 validate_piece(GameState, Board, NewGameState) :-
     [Board, Player, _] = GameState,
-    get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
+    write('Starting validate'), nl,
+    (difficulty(Player, Level) ->
+        get_move(GameState, Player, Level, Col1-Row1-Col2-Row2)
+        ;
+        get_move(Player, Col1-Row1-Col2-Row2, PieceOption)
+    ),
     (PieceOption == 5 -> 
         write('Invalid piece option: 5'), nl, 
         validate_piece(GameState, Board, NewGameState)
@@ -72,7 +77,10 @@ place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState) :-
     assert(board(Board, NewBoard)),
     assert(last_move(Row1-Col1-Col2-Row2-Player-Value)),
     other_player(Player, NextPlayer),
-    NewGameState = [NewBoard, NextPlayer, Phase].
+    (passed(NextPlayer) ->
+        NewGameState = [NewBoard, Player, Phase]
+    ;   NewGameState = [NewBoard, NextPlayer, Phase]
+    ).
 
 % Define a predicate to replace the value on the board at the specified row and column
 replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard, Player) :-
