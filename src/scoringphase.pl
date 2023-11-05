@@ -19,9 +19,10 @@ scoringphase_start(GameState, NewGameState) :-
     remove_piece(Index, PossibleMoves, GameState, NewGameState).
 
 valid_moves_SP(GameState, Player, PossibleMoves) :-
+    [_, _, _] = GameState,
     findall(Row1-Col1-Col2-Row2-PlayerP-Value, (last_move(Row1-Col1-Col2-Row2-PlayerP-Value), PlayerP == Player, valid_removal(Row1-Col1-Col2-Row2, 1, Player)), PossibleMoves).
 
-valid_removal(Row1-Col1-Col2-Row2-PlayerP-Value, Valid, Player) :-
+valid_removal(Row1-Col1-Col2-Row2-_-Value, Valid, Player) :-
     (last_piece_removed(_-_-_-_-Player-ValueR) ->
         (Value >= ValueR -> Valid = 1; Valid = 0)
     ;
@@ -45,7 +46,7 @@ remove_piece(Index, PossibleMoves, GameState, NewGameState) :-
     [Board, Player, Phase] = GameState,
     clear,
     [Row1-Col1-Col2-Row2-PlayerP-Value] = Move,
-     retract(last_move(Row1-Col1-Col2-Row2-PlayerP-Value)).
+    retract(last_move(Row1-Col1-Col2-Row2-PlayerP-Value)),
     empty_cell(Board, Row1, Col1, Row2, Col2, NewBoard),
     retract(board(_, _)),
     assert(board(Board, NewBoard)),
@@ -53,7 +54,7 @@ remove_piece(Index, PossibleMoves, GameState, NewGameState) :-
     NewGameState = [NewBoard, NextPlayer, Phase],
     winning_condition(NewGameState).
     
-removal_operation(Row1-Col1-Col2-Row2-PlayerP-Value, GameState) :-
+removal_operation(Row1-Col1-Col2-Row2-_-Value, GameState) :-
     [_, Player, _] = GameState,
     pieces_same_line(Row1-Col1-Col2-Row2, Count),
     counter_same_line(Row1-Col1-Col2-Row2, Counter),
