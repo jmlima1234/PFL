@@ -8,39 +8,38 @@ clear_data :-
 
 
 read_number(X):-
-    read_number_aux(X,0).
-read_number_aux(X,Acc):- 
-    get_code(C),
-    between(48, 57, C), !,
-    Acc1 is 10*Acc + (C - 48),
-    read_number_aux(X,Acc1).
-read_number_aux(X,X).
+    repeat,
+    read_line(Codes),
+    (catch(number_codes(X, Codes), error(syntax_error(_), _), (write('\nInvalid input. Please enter a number.\n'), fail)) -> ! ; fail).
 
-% get_option(+Min,+Max,+Context,-Value)
-% Unifies Value with the value given by user input between Min and Max when asked about Context
 get_option(Min,Max,Context,Value):-
     format('~a between ~d and ~d: ', [Context, Min, Max]),
     nl,
     repeat,
     read_number(Value),
-    between(Min, Max, Value), !.
+    (between(Min, Max, Value) -> ! ; write('\nInvalid input. Please enter a number between '), write(Min), write(' and '), write(Max), nl, fail, format('~a between ~d and ~d: ', [Context, Min, Max]), nl).
 
-% get_move(+Board,-Coordinate)
-% Unifies Coordinate with a valid coordinate given by input within the Board
-% Prolog
-
-% Prolog
-
-get_move(Player, Col1-Row1-Col2-Row2, Piece):-
-    get_option(1, 6, 'Choose your piece value', Piece),
+get_move(Player, Col1-Row1-Col2-Row2, Piece) :-
+    get_piece_or_pass(1, 6, Piece), % Get the piece value or 'pass'
     (Piece == 'pass' ->
         assertz(passed(Player))
-    ;   true
-    ),
-    get_option(0, 9, 'Start column', Col1),
-    get_option(0, 9, 'Start row', Row1),
-    get_option(0, 9, 'Destination column', Col2),
-    get_option(0, 9, 'Destination row', Row2).
+    ;   get_option(0, 9, '\nStart column', Col1),
+        get_option(0, 9, '\nStart row', Row1),
+        get_option(0, 9, '\nDestination column', Col2),
+        get_option(0, 9, '\nDestination row', Row2)
+    ).
+
+get_piece_or_pass(Min, Max, Value) :-
+    write('Type "value" if you want to play or "pass" to pass: '),
+    nl,
+    read_line(String),    
+    (String == "pass" ->
+        Value = 'pass'
+    ; String == "value" ->  
+        get_option(Min, Max, '\nPiece value', Value)
+    ;   write('\nInvalid input. '),
+        get_piece_or_pass(Min, Max, Value)
+    ).
 
 % put_piece(+Board,+Coordinate,+Piece,-NewBoard).
 put_piece(Board, Col-Row, Piece, NewBoard) :-

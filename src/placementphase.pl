@@ -22,20 +22,32 @@ display_players_pieces([Value-Count-Size|Rest]) :-
     format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
     display_players_pieces(Rest).
 
-% Define a predicate to validate the users piece selection
 validate_piece(GameState, Board, NewGameState) :-
     [Board, Player, _] = GameState,
     get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
-    (PieceOption =:= 5 -> 
-        write('\nInvalid piece option: 5'), nl, 
-        validate_piece
-    ;
+    (PieceOption == 5 -> 
+        write('Invalid piece option: 5'), nl, 
+        validate_piece(GameState, Board, NewGameState)
+    ; PieceOption \= 'pass' ->
         AdjustedRow1 is 11 - Row1,
         AdjustedRow2 is 11 - Row2,
         Tempcol is Col1 + 2,
         Tempcol2 is Col2 + 2,
-        %validate_move_PP(GameState, Col1-Row1,Col2-Row2, size), !,
-        place_piece(GameState, PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2, NewGameState)
+        player_value_pieces(Player, _, Size, PieceOption),
+        (validate_move_PP(GameState, Tempcol-AdjustedRow1,Tempcol2-AdjustedRow2, Size) ->
+            write('Valid move!'), nl,
+            place_piece(GameState, PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2, NewGameState)
+        ; 
+            validate_piece(GameState, Board, NewGameState)
+        )
+    ; 
+        other_player(Player, NextPlayer),
+        (passed(NextPlayer) ->
+            NewGameState = [Board, NextPlayer, 'Scoring Phase'],
+            write('Placement phase is over! Going for the scoring phase!'), nl
+        ;
+            NewGameState = [Board, NextPlayer, 'Placement Phase']
+        )
     ).  
 
 % Define a predicate to select a piece option with active selection

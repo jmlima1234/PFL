@@ -34,7 +34,7 @@ board(12,[
 ]).
 
 
-% Define facts for remaining pieces (player, piece, number of pieces, size, value)
+% Define facts for remaining pieces (player, number of pieces, size, value)
 player_value_pieces('Light', 5, 3, 1).
 player_value_pieces('Light', 4, 4, 2).
 player_value_pieces('Light', 3, 5, 3).
