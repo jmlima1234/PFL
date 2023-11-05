@@ -92,9 +92,11 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, Size) :-
 % game_cycle(+GameState)
 % Loop that keeps the game running
 game_cycle(GameState):-
-    [Board, Player, Phase] = GameState,
+    [_, _, Phase] = GameState,
     Phase == 'game_over', 
-    game_over(GameState, Winner).
+    game_over(GameState, Winner),
+    format('No more tiles to remove. Game Over.~nPlayer ~w wins!', [Winner]), !,
+    reset_game.
 game_cycle(GameState):-
     [Board, _, Phase] = GameState,
     Phase == 'Placement Phase', 
@@ -102,7 +104,7 @@ game_cycle(GameState):-
     validate_piece(GameState, Board, NewGameState), !,  
     game_cycle(NewGameState).
 game_cycle(GameState):-
-    [Board, Player, Phase] = GameState,
+    [_, _, Phase] = GameState,
     Phase == 'Scoring Phase',
     display_board(GameState),
     scoringphase_start(GameState, NewGameState), !,

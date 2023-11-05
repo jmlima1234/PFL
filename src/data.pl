@@ -63,7 +63,7 @@ reset_game :-
     retractall(passed(_)),
     retractall(board(_,_)),
     retractall(player_value_pieces(_,_,_,_)),
-    retractall(score_counter(_,_)),
+    retractall(score_counter(_,_,_)),
     retractall(player_score(_,_)),
 
     assert(board(12,[['  ', ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],

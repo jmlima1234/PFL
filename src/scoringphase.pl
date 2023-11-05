@@ -8,7 +8,6 @@
 scoringphase_start(GameState, NewGameState) :-
     [_, Player, _] = GameState,
     valid_moves_SP(GameState, Player, PossibleMoves),
-    % Adicionar condicaçao caso seja bot para escolher automaticamente
     choose_piece_to_remove(PossibleMoves, Index),
     nth1(Index, PossibleMoves, Move),
     (last_piece_removed(_-_-_-_-Player-_) ->
@@ -17,7 +16,8 @@ scoringphase_start(GameState, NewGameState) :-
     ;
         assert(last_piece_removed(Move))
     ),
-    remove_piece(Index, PossibleMoves, GameState, NewGameState).
+    remove_piece(Index, PossibleMoves, GameState, TempNewGameState),
+    winning_condition(TempNewGameState, NewGameState).
 
 valid_moves_SP(GameState, Player, PossibleMoves) :-
     [_, _, _] = GameState,
@@ -38,8 +38,6 @@ valid_removal(Row1-Col1-Col2-Row2-_-Value, Valid, Player) :-
     TempRow4 is 11 - Row4,
     TempCol3 is Col3 + 2,
     TempCol4 is Col4 + 2,
-
-    format('Row1: ~w, Col1: ~w, Col2: ~w, Row2: ~w, Row3: ~w, Col3: ~w, Row4: ~w, Col4: ~w~n', [Row1, Col1, Col2, Row2, TempRow3, TempCol3, TempRow4, TempCol4]),
 
     (Row1 == Row2 ->
         (Row1 == TempRow4 ->
@@ -70,8 +68,7 @@ remove_piece(Index, PossibleMoves, GameState, NewGameState) :-
     retract(last_move(Row1-Col1-Col2-Row2-PlayerP-Value)),
     retract(board(_, _)),
     assert(board(Board, NewBoard)),
-    other_player(Player, NextPlayer),
-    NewGameState = [NewBoard, NextPlayer, Phase].
+    NewGameState = [NewBoard, Player, Phase].
     
 removal_operation(Row1-Col1-Col2-Row2-_-Value, GameState) :-
     [_, Player, _] = GameState,
@@ -175,22 +172,24 @@ replace_row(Row, Col1, Col2, NewRow) :-
     length(Row, Length),
     findall(Y, (between(1, Length, I), (I >= Col1, I =< Col2 -> Y = ' - '; nth1(I, Row, Y))), NewRow).
 
-winning_condition(GameState) :-
-    [Board, Player, _] = GameState,
-    other_player(Player, NextPlayer),
-    valid_moves_SP(GameState, Player, PossibleMoves),
+winning_condition(GameState, NewGameState) :-
+    [Board, Player, Phase] = GameState,
     player_score(Player, Score),
-    player_score(NextPlayer, NextScore),
-    (Score == 100 -> Winner = Player
-    ; NextScore == 100 -> Winner = NextPlayer
-    ; PossibleMoves == [] -> Winner = NextPlayer
-    ; fail),
-    GameState = [Board, Winner, 'game_over'].
+    other_player(Player, NextPlayer),
+    valid_moves_SP(GameState, NextPlayer, PossibleMoves),
+    length(PossibleMoves, Length),
+    (Score >= 100 ->
+        NewGameState = [Board, Player, 'game_over']
+    ; Length == 0 ->
+        NewGameState = [Board, Player, 'game_over']
+    ; 
+        NewGameState = [Board, NextPlayer, Phase]
+    ).
+   
 
-game_over(GameState) :-
+game_over(GameState, Winner) :-
     [_, Winner, _] = GameState,
-    display_board(GameState),
-    format('No more tiles to remove. Game Over.~nPlayer ~w wins!', [Winner]).
+    display_board(GameState).
 
 choose_move(GameState, Player, Level, Move) :-
     valid_moves_SP(GameState, Player, PossibleMoves),
