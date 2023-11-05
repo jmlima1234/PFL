@@ -36,24 +36,26 @@ validate_move_PP(GameState, ColI-RowI, ColF-RowF, Size) :-
     check_bounds(Board, ColF-RowF),
     nth1(RowI, Board, RowList),
     nth1(ColI, RowList, Cell),
-    format('Move: ~d ~d ~d ~d ~d ', [RowI,ColI, ColF, RowF, Size]),
     (Cell == ' - ' ->
         (
-            (ColF - ColI == Size ->
-                Row is RowI + 1,
-                NewSize is Size - 1,
-                validate_move_PP(GameState, ColI-ColF, Row-RowF, NewSize)
-            ; RowF - RowI == Size ->
+            TempVarCol is ColF - ColI + 1,
+            TempVarRow is RowF - RowI + 1,
+            (TempVarCol == Size ->
                 Col is ColI + 1,
                 NewSize is Size - 1,
                 validate_move_PP(GameState, Col-RowI, ColF-RowF, NewSize)
+            ; TempVarRow == Size ->
+                Row is RowI + 1,
+                NewSize is Size - 1,
+                validate_move_PP(GameState, ColI-Row, ColF-RowF, NewSize)
             ; 
                 write('Invalid Move! Size is incorrect'), nl,
-                validate_piece(GameState, Board, NewGameState)
+                fail
             )
         )
     ; % Cell is not empty
-        write('Invalid Move! Cell is not empty.\n')
+        write('Invalid Move! Cell is not empty'), nl,
+        fail
     ).
 
 

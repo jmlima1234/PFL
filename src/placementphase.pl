@@ -22,11 +22,9 @@ display_players_pieces([Value-Count-Size|Rest]) :-
     format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
     display_players_pieces(Rest).
 
-% Define a predicate to validate the users piece selection
 validate_piece(GameState, Board, NewGameState) :-
     [Board, Player, _] = GameState,
     get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
-    format('Piece option: ~w', [PieceOption]),
     (PieceOption == 5 -> 
         write('Invalid piece option: 5'), nl, 
         validate_piece(GameState, Board, NewGameState)
@@ -36,8 +34,12 @@ validate_piece(GameState, Board, NewGameState) :-
         Tempcol is Col1 + 2,
         Tempcol2 is Col2 + 2,
         player_value_pieces(Player, _, Size, PieceOption),
-        validate_move_PP(GameState, Col1-Row1,Col2-Row2, Size), !,
-        place_piece(GameState, PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2, NewGameState)
+        (validate_move_PP(GameState, Tempcol-AdjustedRow1,Tempcol2-AdjustedRow2, Size) ->
+            write('Valid move!'), nl,
+            place_piece(GameState, PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2, NewGameState)
+        ; 
+            validate_piece(GameState, Board, NewGameState)
+        )
     ; 
         other_player(Player, NextPlayer),
         (passed(NextPlayer) ->
