@@ -36,14 +36,14 @@ validate_move_PP(GameState, ColI-RowI, ColF-RowF, Size) :-
     check_bounds(Board, ColF-RowF),
     nth1(RowI, Board, RowList),
     nth1(ColI, RowList, Cell),
-    format('Move: ~d ~d ~d ~d ~d ', [RowI,ColI, ColF, RowF, Size]),
+    format('Move: ~d ~d ~d ~d ~d ', [RowI,ColI, ColF, RowF, Size]), nl,
     (Cell == ' - ' ->
         (
-            (ColF - ColI == Size ->
+            (ColF - ColI =:= Size ->
                 Row is RowI + 1,
                 NewSize is Size - 1,
                 validate_move_PP(GameState, ColI-ColF, Row-RowF, NewSize)
-            ; RowF - RowI == Size ->
+            ; RowF - RowI =:= Size ->
                 Col is ColI + 1,
                 NewSize is Size - 1,
                 validate_move_PP(GameState, Col-RowI, ColF-RowF, NewSize)
