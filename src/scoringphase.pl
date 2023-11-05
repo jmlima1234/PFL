@@ -32,12 +32,14 @@ valid_removal(Row1-Col1-Col2-Row2-_-Value, Valid, Player) :-
         Valid = 1
     ),
 
-    score_counter('Light', Row3, Col3),
-    score_counter('Dark', Row4, Col4),
+    score_counter('Light', Col3, Row3),
+    score_counter('Dark', Col4, Row4),
     TempRow3 is 11 - Row3,
     TempRow4 is 11 - Row4,
     TempCol3 is Col3 + 2,
     TempCol4 is Col4 + 2,
+
+    format('Row1: ~w, Col1: ~w, Col2: ~w, Row2: ~w, Row3: ~w, Col3: ~w, Row4: ~w, Col4: ~w~n', [Row1, Col1, Col2, Row2, TempRow3, TempCol3, TempRow4, TempCol4]),
 
     (Row1 == Row2 ->
         (Row1 == TempRow4 ->
@@ -133,20 +135,27 @@ handle_score_update(Player, NewScore) :-
     update_score_counter(Player, FinalScore).
 
 update_score_counter(Player, FinalScore) :-
-    score_counter(Player, Row, Col),
+    score_counter(Player, Col, Row),
 
     (Player == 'Dark' ->
-        NewRow is Row - FinalScore,
-        NewCol is Col
+        NewCol is Col - FinalScore,
+        (NewCol < 0 -> 
+            RowsDown is abs(NewCol // 10) + 1,
+            AdjustedCol is (NewCol mod 10)
+        ;
+            RowsDown = 0,
+            AdjustedCol = NewCol
+        ),
+        NewRow is Row - RowsDown
     ;
         TotalPoints is Row * 10 + Col,
         NewTotalPoints is TotalPoints + FinalScore,
         NewRow is NewTotalPoints div 10,
-        NewCol is NewTotalPoints mod 10
+        AdjustedCol is NewTotalPoints mod 10
     ),
 
-    retract(score_counter(Player, Row, Col)),
-    assert(score_counter(Player, NewRow, NewCol)).
+    retract(score_counter(Player, Col, Row)),
+    assert(score_counter(Player, AdjustedCol, NewRow)).
 
 empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard) :-
     ( Row1 == Row2 ->

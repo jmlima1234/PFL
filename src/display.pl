@@ -72,12 +72,12 @@ display_current_player(Player) :-
 
 % Define a predicate to display the counter position
 display_counter_position :-
-    findall(score_counter(Player, Row, Col), score_counter(Player, Row, Col), CounterPositions),
+    findall(score_counter(Player,Col, Row), score_counter(Player,Col, Row), CounterPositions),
     display_counter_position(CounterPositions).
 
 display_counter_position([]) :- nl.
-display_counter_position([score_counter(Player, Row, Col)|Rest]) :-
-    format('Counter position for ~w player: (~w, ~w)~n', [Player, Row, Col]),
+display_counter_position([score_counter(Player,Col, Row)|Rest]) :-
+    format('Counter position for ~w player: (~w, ~w)~n', [Player,Col, Row]),
     display_counter_position(Rest).
 
 
