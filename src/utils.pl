@@ -8,47 +8,39 @@ clear_data :-
 
 
 read_number(X):-
-    read_number_aux(X,0).
-read_number_aux(X,Acc):- 
-    get_code(C),
-    between(48, 57, C), !,
-    Acc1 is 10*Acc + (C - 48),
-    read_number_aux(X,Acc1).
-read_number_aux(X,X).
+    repeat,
+    read_line(Codes),
+    (catch(number_codes(X, Codes), error(syntax_error(_), _), (write('\nInvalid input. Please enter a number.\n'), fail)) -> ! ; fail).
 
-% get_option(+Min,+Max,+Context,-Value)
-% Unifies Value with the value given by user input between Min and Max when asked about Context
 get_option(Min,Max,Context,Value):-
     format('~a between ~d and ~d: ', [Context, Min, Max]),
     nl,
     repeat,
     read_number(Value),
-    between(Min, Max, Value), !.
+    (between(Min, Max, Value) -> ! ; write('\nInvalid input. Please enter a number between '), write(Min), write(' and '), write(Max), nl, fail, format('~a between ~d and ~d: ', [Context, Min, Max]), nl).
 
 get_move(Player, Col1-Row1-Col2-Row2, Piece) :-
-    get_piece_or_pass(1, 6, 'Do you want to type a value', Piece), % Get the piece value or 'pass'
+    get_piece_or_pass(1, 6, Piece), % Get the piece value or 'pass'
     (Piece == 'pass' ->
         assertz(passed(Player))
-    ;   get_option(0, 9, 'Start column', Col1),
-        get_option(0, 9, 'Start row', Row1),
-        get_option(0, 9, 'Destination column', Col2),
-        get_option(0, 9, 'Destination row', Row2)
+    ;   get_option(0, 9, '\nStart column', TempCol1),
+        get_option(0, 9, '\nEnd column', TempCol2),
+        get_option(0, 9, '\nStart row', TempRow1),
+        get_option(0, 9, '\nEnd row', TempRow2),
+        (TempCol1 > TempCol2 -> Col1 = TempCol2, Col2 = TempCol1 ; Col1 = TempCol1, Col2 = TempCol2),
+        (TempRow1 < TempRow2 -> Row1 = TempRow2, Row2 = TempRow1 ; Row1 = TempRow1, Row2 = TempRow2)
     ).
 
-get_piece_or_pass(Min,Max,Context,Value) :-
-    format(' ~a between ~d and ~d or type "pass"? ', [Context, Min, Max]),
+get_piece_or_pass(Min, Max, Value) :-
+    write('Type "value" if you want to play or "pass" to pass: '),
     nl,
     read_line(String),    
     (String == "pass" ->
         Value = 'pass'
     ; String == "value" ->  
-        format('~a between ~d and ~d: ', [Context, Min, Max]),
-        nl,
-        repeat,
-        read_number(Value),
-        between(Min, Max, Value), !
-    ;   write('Invalid input. Please enter a numeric piece value or "pass".\n'),
-        get_piece_or_pass(1, 6, 'Do you want to type a value', Piece)
+        get_option(Min, Max, '\nPiece value', Value)
+    ;   write('\nInvalid input. '),
+        get_piece_or_pass(Min, Max, Value)
     ).
 
 % put_piece(+Board,+Coordinate,+Piece,-NewBoard).

@@ -28,23 +28,20 @@ display_rows(CurrentRow, [Row|Rows]) :-
     display_rows(NextRow, Rows).
 
 display_row(_, _, [], _) :- nl.
-display_row(CurrentRow, CurrentCol, [Cell|Rest], HasWritten) :-
+display_row(CurrentRow, CurrentCol, [Cell|Rest], LastMoveEnd) :-
     findall(LastMove, last_move(LastMove), LastMoves),
     (LastMoves = [] ->
-        write(' | '), write(Cell), HasWritten1 is HasWritten
+        write(' | '), write(Cell), NewLastMoveEnd = 0
     ;
         % Check if the current cell is in the range specified by LastMoves
         (member(Row1-Col1-Col2-Row2-_-_, LastMoves), Row1 == CurrentRow, CurrentRow == Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
-            (HasWritten == 0 ->
-                write(' | '), write(Cell), HasWritten1 is 1
-            ;
-                write('   '), write(Cell), HasWritten1 is HasWritten)
-        ;
-            write(' | '), write(Cell), HasWritten1 is 0)
+            (CurrentCol > LastMoveEnd -> write(' | '), write(Cell), NewLastMoveEnd = Col2 ; write('   '), write(Cell), NewLastMoveEnd = LastMoveEnd)
+        ;   
+            write(' | '), write(Cell), NewLastMoveEnd = 0
+        )
     ),
-
     NextCol is CurrentCol + 1,
-    display_row(CurrentRow, NextCol, Rest, HasWritten1).
+    display_row(CurrentRow, NextCol, Rest, NewLastMoveEnd).
 
 
 display_separator :-
