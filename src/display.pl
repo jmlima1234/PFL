@@ -33,7 +33,6 @@ display_row(CurrentRow, CurrentCol, [Cell|Rest], LastMoveEnd) :-
     (LastMoves = [] ->
         write(' | '), write(Cell), NewLastMoveEnd = 0
     ;
-        % Check if the current cell is in the range specified by LastMoves
         (member(Row1-Col1-Col2-Row2-_-_, LastMoves), Row1 == CurrentRow, CurrentRow == Row2, Col1 =< CurrentCol, CurrentCol =< Col2 ->
             (CurrentCol > LastMoveEnd -> write(' | '), write(Cell), NewLastMoveEnd = Col2 ; write('   '), write(Cell), NewLastMoveEnd = LastMoveEnd)
         ;   
@@ -73,12 +72,12 @@ display_current_player(Player) :-
 
 % Define a predicate to display the counter position
 display_counter_position :-
-    findall(score_counter(Player, Row, Col), score_counter(Player, Row, Col), CounterPositions),
+    findall(score_counter(Player,Col, Row), score_counter(Player,Col, Row), CounterPositions),
     display_counter_position(CounterPositions).
 
 display_counter_position([]) :- nl.
-display_counter_position([score_counter(Player, Row, Col)|Rest]) :-
-    format('Counter position for ~w player: (~w, ~w)~n', [Player, Row, Col]),
+display_counter_position([score_counter(Player,Col, Row)|Rest]) :-
+    format('Counter position for ~w player: (~w, ~w)~n', [Player,Col, Row]),
     display_counter_position(Rest).
 
 
@@ -94,15 +93,3 @@ display_scores :-
 % Define a predicate to display the winner
 display_winner :-
     write('No more tiles to remove. Game ends. \nPlayer Dark wins!').
-
-% Define a predicate to the start board
-%start_board(Board) :-
-%    board(_, Board),
-%    display_board(Board).
-
-% Define a predicate to start the game screen
-%game_start :-
-%    write('PLACEMENT PHASE: \n'),
-%    start_board(Board),
-%    validate_piece,
-%    display_board(Board).
