@@ -1,6 +1,7 @@
 :- use_module(library(between)).
 
 clear_data :-
+    retractall(last_piece_removed(_)),
     retractall(name_of(_,_)),
     retractall(passed(_)),
     retractall(difficulty(_, _)),
@@ -51,13 +52,22 @@ put_piece(Board, Col-Row, Piece, NewBoard) :-
 
 
 choose_piece_to_remove(PossibleMoves, Index) :-
-    write('Your possible moves are: '), nl,
+    write('Your possible moves are: '), nl, nl,
     print_list(PossibleMoves, 1),
     length(PossibleMoves, Length),
-    get_option(1, Length, 'Choose a piece to remove', Index).
+    get_option(1, Length, '\nChoose a piece to remove', Index).
 
 print_list([], _).
-print_list([H|T], Index) :-
-    write(Index), write(' - '), write(H), nl,
+print_list([Row1-Col1-Col2-Row2-PlayerP-Value|T], Index) :-
+    AdjustedRow1 is 11 - Row1,
+    AdjustedRow2 is 11 - Row2,
+    Tempcol is Col1 - 2,
+    Tempcol2 is Col2 - 2,
+    write(Index), write(' - '), 
+    write('ColI = '), write(Tempcol), write(', '),
+    write('ColF = '), write(Tempcol2), write(', '),
+    write('RowI = '), write(AdjustedRow1), write(', '),
+    write('RowF = '), write(AdjustedRow2), write(', '),
+    write('Value = '), write(Value), nl,
     NewIndex is Index + 1,
     print_list(T, NewIndex).

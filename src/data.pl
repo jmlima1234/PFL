@@ -57,3 +57,42 @@ other_player('Dark', 'Light').
 other_player('Light', 'Dark').
 
 
+reset_game :-
+    retractall(name_of(_,_)),
+    retractall(difficulty(_,_)),
+    retractall(passed(_)),
+    retractall(board(_,_)),
+    retractall(player_value_pieces(_,_,_,_)),
+    retractall(score_counter(_,_)),
+    retractall(player_score(_,_)),
+
+    assert(board(12,[['  ', ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
+                     ['90',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', '  0 |'],
+                     ['80',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 10 |'],
+                     ['70',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 20 |'],
+                     ['60',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 30 |'],
+                     ['50',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 40 |'],
+                     ['40',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 50 |'],
+                     ['30',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 60 |'],
+                     ['20',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 70 |'],
+                     ['10',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 80 |'],
+                     ['0 ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 90 |'],
+                     ['  ', ' 0 ', ' 1 ', ' 2 ', ' 3 ', ' 4 ', ' 5 ', ' 6 ', ' 7 ', ' 8 ',' 9 ', '    |']
+                    ])),
+
+    assert(player_value_pieces('Light', 5, 3, 1)),
+    assert(player_value_pieces('Light', 4, 4, 2)),
+    assert(player_value_pieces('Light', 3, 5, 3)),
+    assert(player_value_pieces('Light', 2, 6, 4)),
+    assert(player_value_pieces('Light', 1, 7, 6)),
+    assert(player_value_pieces('Dark', 5, 3, 1)),
+    assert(player_value_pieces('Dark', 4, 4, 2)),
+    assert(player_value_pieces('Dark', 3, 5, 3)),
+    assert(player_value_pieces('Dark', 2, 6, 4)),
+    assert(player_value_pieces('Dark', 1, 7, 6)),
+
+    assert(score_counter('Light', 0, 0)),
+    assert(score_counter('Dark', 9, 9)),
+
+    assert(player_score('Light', 0)),
+    assert(player_score('Dark', 0)).

@@ -7,17 +7,6 @@
 :- consult('placementphase.pl').
 :- consult('scoringphase.pl').
 
-
-% start_game
-%start :-
-%    retractall(last_move(_)),
-%    home,
-%    board(_, Board),
-%    display_board(Board),
-%    validate_piece,
-%    validate_piece,
-%    remove_piece(6,1).
-
 % in_bounds(+Board,+Coordinate)
 % Checks if calculated coordinate is inside Board
 check_bounds(Board, Col-Row) :-
@@ -36,7 +25,6 @@ validate_move_PP(GameState, ColI-RowI, ColF-RowF, Size) :-
     check_bounds(Board, ColF-RowF),
     nth1(RowI, Board, RowList),
     nth1(ColI, RowList, Cell),
-    format('Cell: ~w\n', [Cell]),
     (Cell == ' - ' ->
         (
             TempVarCol is ColF - ColI + 1,

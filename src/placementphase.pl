@@ -44,8 +44,10 @@ validate_piece(GameState, Board, NewGameState) :-
         other_player(Player, NextPlayer),
         (passed(NextPlayer) ->
             NewGameState = [Board, NextPlayer, 'Scoring Phase'],
+            clear,
             write('Placement phase is over! Going for the scoring phase!'), nl
         ;
+            clear,
             NewGameState = [Board, NextPlayer, 'Placement Phase']
         )
     ).  
