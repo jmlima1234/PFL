@@ -67,5 +67,3 @@ configurations([Board,'Dark','Placement Phase']):-
     blank_lines,
     set_mode,
     init_state(Board).
-
-

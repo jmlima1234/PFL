@@ -55,5 +55,3 @@ player_score('Dark', 0).
 
 other_player('Dark', 'Light').
 other_player('Light', 'Dark').
-
-

@@ -24,12 +24,7 @@ display_players_pieces([Value-Count-Size|Rest]) :-
 
 validate_piece(GameState, Board, NewGameState) :-
     [Board, Player, _] = GameState,
-    write('Starting validate'), nl,
-    (difficulty(Player, Level) ->
-        get_move(GameState, Player, Level, Col1-Row1-Col2-Row2)
-        ;
-        get_move(Player, Col1-Row1-Col2-Row2, PieceOption)
-    ),
+    get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
     (PieceOption == 5 -> 
         write('Invalid piece option: 5'), nl, 
         validate_piece(GameState, Board, NewGameState)

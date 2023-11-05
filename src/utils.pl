@@ -4,31 +4,22 @@ clear_data :-
     retractall(name_of(_,_)),
     retractall(passed(_)),
     retractall(difficulty(_, _)),
-    retractall(last_move(_)),
-    retractall(board(_,_)),
-    retractall(player_value_pieces(_,_,_,_)),
-    retractall(score_counter(_,_,_)),
-    retractall(player_score(_,_)).
+    retractall(last_move(_)).
+
 
 read_number(X):-
     repeat,
     read_line(Codes),
     (catch(number_codes(X, Codes), error(syntax_error(_), _), (write('\nInvalid input. Please enter a number.\n'), fail)) -> ! ; fail).
 
+% get_option(+Min, +Max, +Context, -Value)
 get_option(Min,Max,Context,Value):-
     format('~a between ~d and ~d: ', [Context, Min, Max]),
     nl,
     repeat,
     read_number(Value),
-    (between(Min, Max, Value) -> ! ; write('\nInvalid input. Please enter a number between '), write(Min), write(' and '), write(Max), nl, fail, format('~a between ~d and ~d: ', [Context, Min, Max]), nl).
-
-get_move(GameState, Player, 1, Col1-Row1-Col2-Row2) :-
-    has_possible_moves(GameState, Moves),
-    (Moves == [] ->
-        assertz(passed(Player))
-        ;
-        random_member(Col1-Row1-Col2-Row2, Moves)
-    ).
+    (between(Min, Max, Value) -> ! ; write('\nInvalid input. Please enter a number between '), 
+    write(Min), write(' and '), write(Max), nl, fail, format('~a between ~d and ~d: ', [Context, Min, Max]), nl).
 
 get_move(Player, Col1-Row1-Col2-Row2, Piece) :-
     get_piece_or_pass(1, 6, Piece), % Get the piece value or 'pass'
