@@ -70,7 +70,10 @@ place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState) :-
     assert(board(Board, NewBoard)),
     assert(last_move(Row1-Col1-Col2-Row2-Player-Value)),
     other_player(Player, NextPlayer),
-    NewGameState = [NewBoard, NextPlayer, Phase].
+    (passed(NextPlayer) ->
+        NewGameState = [NewBoard, Player, Phase]
+    ;   NewGameState = [NewBoard, NextPlayer, Phase]
+    ).
 
 % Define a predicate to replace the value on the board at the specified row and column
 replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard, Player) :-

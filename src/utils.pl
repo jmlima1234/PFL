@@ -23,13 +23,21 @@ get_move(Player, Col1-Row1-Col2-Row2, Piece) :-
     get_piece_or_pass(1, 6, Piece), % Get the piece value or 'pass'
     (Piece == 'pass' ->
         assertz(passed(Player))
-    ;   get_option(0, 9, '\nStart column', TempCol1),
-        get_option(0, 9, '\nEnd column', TempCol2),
-        get_option(0, 9, '\nStart row', TempRow1),
-        get_option(0, 9, '\nEnd row', TempRow2),
-        (TempCol1 > TempCol2 -> Col1 = TempCol2, Col2 = TempCol1 ; Col1 = TempCol1, Col2 = TempCol2),
-        (TempRow1 < TempRow2 -> Row1 = TempRow2, Row2 = TempRow1 ; Row1 = TempRow1, Row2 = TempRow2)
+    ;   
+        player_value_pieces(Player, Number, _, Piece),
+        (Number > 0 ->
+            get_option(0, 9, '\nStart column', TempCol1),
+            get_option(0, 9, '\nEnd column', TempCol2),
+            get_option(0, 9, '\nStart row', TempRow1),
+            get_option(0, 9, '\nEnd row', TempRow2),
+            (TempCol1 > TempCol2 -> Col1 = TempCol2, Col2 = TempCol1 ; Col1 = TempCol1, Col2 = TempCol2),
+            (TempRow1 < TempRow2 -> Row1 = TempRow2, Row2 = TempRow1 ; Row1 = TempRow1, Row2 = TempRow2)
+        ;
+            write('Invalid piece. You already played all the pieces with this value!'), nl,
+            get_move(Player, Col1-Row1-Col2-Row2, Piece)
+        )
     ).
+
 
 get_piece_or_pass(Min, Max, Value) :-
     write('Type "value" if you want to play or "pass" to pass: '),
