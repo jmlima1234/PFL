@@ -148,17 +148,17 @@ replace_row(Row, Col1, Col2, NewRow) :-
     length(Row, Length),
     findall(Y, (between(1, Length, I), (I >= Col1, I =< Col2 -> Y = ' - '; nth1(I, Row, Y))), NewRow).
 
-winning_condition(NewGameState) :-
-    [Board, Player, _] = NewGameState,
+winning_condition(GameState) :-
+    [Board, Player, _] = GameState,
     other_player(Player, NextPlayer),
-    valid_moves_SP(NewGameState, Player, PossibleMoves),
+    valid_moves_SP(GameState, Player, PossibleMoves),
     player_score(Player, Score),
     player_score(NextPlayer, NextScore),
     (Score == 100 -> Winner = Player
     ; NextScore == 100 -> Winner = NextPlayer
     ; PossibleMoves == [] -> Winner = NextPlayer
     ; fail),
-    NewGameState = [Board, Winner, 'game_over'].
+    GameState = [Board, Winner, 'game_over'].
 
 game_over(GameState) :-
     [_, Winner, _] = GameState,

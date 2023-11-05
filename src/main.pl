@@ -103,25 +103,22 @@ check_possible_moves(Board, Player, Pieces, Row, Col, Moves, Size) :-
 
 % game_cycle(+GameState)
 % Loop that keeps the game running
-% game_cycle(GameState):-
-    % [Board, Player, Phase] = GameState,
-    % game_over(GameState, Winner), !,
-    % display_board(Board),
-    % show_winner(GameState, Winner).
+game_cycle(GameState):-
+    [Board, Player, Phase] = GameState,
+    Phase == 'game_over', 
+    game_over(GameState, Winner).
 game_cycle(GameState):-
     [Board, _, Phase] = GameState,
-    Phase \= 'Scoring Phase',
+    Phase == 'Placement Phase', 
     display_board(GameState),
-    validate_piece(GameState, Board, NewGameState),
+    validate_piece(GameState, Board, NewGameState), !,  
     game_cycle(NewGameState).
-% game_cycle(GameState):-
-    % [Board, Player, Phase] = GameState,
-    % Phase =:= 'Scoring Phase',
-    % display_board(Board),
-    % print_turn(NewGameState),
-    % choose_move_SP(NewGameState, Move),
-    % move_SP(NewGameState, Move, NewGameState2), !,
-    % game_cycle(NewGameState2).
+game_cycle(GameState):-
+    [Board, Player, Phase] = GameState,
+    Phase == 'Scoring Phase',
+    display_board(GameState),
+    scoringphase_start(GameState, NewGameState), !,
+    game_cycle(NewGameState).
 
 play :-
     clear_data,
