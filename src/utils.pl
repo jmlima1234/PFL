@@ -60,7 +60,6 @@ put_piece(Board, Col-Row, Piece, NewBoard) :-
     replace(Col, Piece, Line, NewLine),
     replace(Row, NewLine, Board, NewBoard).
 
-
 choose_piece_to_remove(PossibleMoves, Index) :-
     write('Your possible moves are: '), nl, nl,
     print_list(PossibleMoves, 1),
@@ -68,7 +67,7 @@ choose_piece_to_remove(PossibleMoves, Index) :-
     get_option(1, Length, '\nChoose a piece to remove', Index).
 
 print_list([], _).
-print_list([Row1-Col1-Col2-Row2-PlayerP-Value|T], Index) :-
+print_list([Row1-Col1-Col2-Row2-_-Value|T], Index) :-
     AdjustedRow1 is 11 - Row1,
     AdjustedRow2 is 11 - Row2,
     Tempcol is Col1 - 2,
