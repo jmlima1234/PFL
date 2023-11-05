@@ -200,7 +200,3 @@ choose_move(GameState, Player, Level, Move) :-
     ;
         choose_best_move(GameState, Player, PossibleMoves, Move)
     ).
-
-
-
-

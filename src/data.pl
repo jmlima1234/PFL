@@ -56,7 +56,6 @@ player_score('Dark', 0).
 other_player('Dark', 'Light').
 other_player('Light', 'Dark').
 
-
 reset_game :-
     retractall(name_of(_,_)),
     retractall(difficulty(_,_)),

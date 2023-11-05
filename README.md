@@ -238,4 +238,31 @@ Score for Dark player: 28
 No more tiles to remove. Game ends. 
 Player Dark wins!
 ```
-**InitialBoard**
+**Game State Visualization**
+
+Before initiating the game, the user(s) must configurate their match. They need to choose the mode (human/human, human/bot or bot/bot) and then the difficulty of the bots, in case the user selected one of the modes that requires a bot. There is the random and hard difficulties.
+In any case, the validation of the user inputs and every possible play are secured. This is a possible interaction:
+
+    ![](./images/menu.png)
+
+    ![](./images/menu02.png)
+
+The validation of menu inputs is performed through the generic predicate 'get_option/4.' This predicate is also essential in validating coordinate inputs.
+
+    ![](./images/get_option.png)
+
+Regarding Bot players, the difficulty ('difficulty/2') is dynamically placed in the fact database to be accessible in all predicates.
+
+    ![](./images/choose_difficulty.png)
+
+Besides that, the configuration process will be automatically finished since the board has a fixed size and the initial state will be initialized. 
+
+    ![](./images/configurations.png)
+
+With the GameState initialized, we can say that the configurations process is 100% complete. After that, the board will be showed. In each iteration, this action unleashed by the predicate 'display_board/1'.
+
+    ![](./images/display_board.png)
+
+The predicate 'display_rows/2' is responsible for printing the pieces at the right coordinates. In order to generalize the relations, it is considered 'L-1' to represent the piece of value 1 from the player 'Light' and the same thing applies to the 'Dark' player.
+
+**Move Validation and Execution**
