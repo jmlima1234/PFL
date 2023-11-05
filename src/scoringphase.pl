@@ -6,28 +6,26 @@
 % Define a predicate to start scoring phase
 scoringphase_start(GameState, NewGameState) :-
     [_, Player, _] = GameState,
-    check_possible_removal(GameState, PossibleMoves),
+    valid_moves_SP(GameState, Player, PossibleMoves),
+    % Adicionar condicaçao caso seja bot para escolher automaticamente
     choose_piece_to_remove(PossibleMoves, Index),
     nth1(Index, PossibleMoves, Move),
-    valid_removal(Move, Valid, Player),
-    (Valid == 1 ->
-        remove_piece(Index, GameState, NewGameState)
+    (last_piece_removed(_-_-_-_-Player-_) ->
+        retract(last_piece_removed(_-_-_-_-Player-_)),
+        assert(last_piece_removed(Move))
     ;
-        scoringphase_start(GameState, NewGameState)
-    ).
+        assert(last_piece_removed(Move))
+    ),
+    remove_piece(Index, PossibleMoves, GameState, NewGameState).
 
-check_possible_removal(GameState, PossibleMoves) :-
-    [_, Player, _] = GameState,
+valid_moves_SP(GameState, Player, PossibleMoves) :-
     findall(Row1-Col1-Col2-Row2-PlayerP-Value, (last_move(Row1-Col1-Col2-Row2-PlayerP-Value), PlayerP == Player, valid_removal(Row1-Col1-Col2-Row2, 1, Player)), PossibleMoves).
 
 valid_removal(Row1-Col1-Col2-Row2-PlayerP-Value, Valid, Player) :-
     (last_piece_removed(_-_-_-_-Player-ValueR) ->
-        (Value >= ValueR -> Valid = 1; Valid = 0),
-        retract(last_piece_removed(_-_-_-_-Player-ValueR)),
-        assert(last_piece_removed(Row1-Col1-Col2-Row2-PlayerP-Value))
+        (Value >= ValueR -> Valid = 1; Valid = 0)
     ;
-        assert(last_piece_removed(Row1-Col1-Col2-Row2-PlayerP-Value)),
-        Valid = 1;
+        Valid = 1
     ),
 
     score_counter('Light', Row3, Col3),
@@ -41,11 +39,13 @@ valid_removal(Row1-Col1-Col2-Row2-PlayerP-Value, Valid, Player) :-
         (Row1 =< Row4, Row4 =< Row2 -> Valid = 0; true)
     ).
 
-remove_piece(Index, GameState, NewGameState) :-
+remove_piece(Index, PossibleMoves, GameState, NewGameState) :-
     nth1(Index, PossibleMoves, Move),
-    removal_operation(Move, GameState, NewGameState),
+    removal_operation(Move, GameState),
     [Board, Player, Phase] = GameState,
     clear,
+    [Row1-Col1-Col2-Row2-PlayerP-Value] = Move,
+     retract(last_move(Row1-Col1-Col2-Row2-PlayerP-Value)).
     empty_cell(Board, Row1, Col1, Row2, Col2, NewBoard),
     retract(board(_, _)),
     assert(board(Board, NewBoard)),
@@ -53,13 +53,12 @@ remove_piece(Index, GameState, NewGameState) :-
     NewGameState = [NewBoard, NextPlayer, Phase],
     winning_condition(NewGameState).
     
-removal_operation(Row1-Col1-Col2-Row2-PlayerP-Value, GameState, NewGameState) :-
+removal_operation(Row1-Col1-Col2-Row2-PlayerP-Value, GameState) :-
     [_, Player, _] = GameState,
     pieces_same_line(Row1-Col1-Col2-Row2, Count),
     counter_same_line(Row1-Col1-Col2-Row2, Counter),
     max_points(Value, Count, Counter, MaxPoints),
-    handle_score_update(Player, MaxPoints),
-    retract(last_move(Row1-Col1-Col2-Row2-PlayerP-Value)).
+    handle_score_update(Player, MaxPoints).
 
 pieces_same_line(Row1-Col1-Col2-Row2, Count) :-
     (Row1 == Row2 -> 
@@ -151,7 +150,7 @@ replace_row(Row, Col1, Col2, NewRow) :-
 winning_condition(NewGameState) :-
     [Board, Player, _] = NewGameState,
     other_player(Player, NextPlayer),
-    check_possible_removal(NewGameState, PossibleMoves),
+    valid_moves_SP(NewGameState, Player, PossibleMoves),
     player_score(Player, Score),
     player_score(NextPlayer, NextScore),
     (Score == 100 -> Winner = Player
@@ -165,12 +164,15 @@ game_over(GameState) :-
     display_board(GameState),
     format('No more tiles to remove. Game Over.~nPlayer ~w wins!', [Winner]).
 
-
-check_bot_removal(GameState, Move) :-
-    check_possible_removal(GameState, PossibleMoves),
-    length(PossibleMoves, Length),
-    random(1, Length, Index),
-    nth1(Index, PossibleMoves, Move).
+choose_move(GameState, Player, Level, Move) :-
+    valid_moves_SP(GameState, Player, PossibleMoves),
+    (Level == 1 ->
+        length(PossibleMoves, Length),
+        random(1, Length, Index),
+        nth1(Index, PossibleMoves, Move)
+    ;
+        choose_best_move(GameState, Player, PossibleMoves, Move)
+    ).
 
 
 
