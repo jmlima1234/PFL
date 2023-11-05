@@ -26,19 +26,11 @@ display_players_pieces([Value-Count-Size|Rest]) :-
 validate_piece(GameState, Board, NewGameState) :-
     [Board, Player, _] = GameState,
     get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
+    format('Piece option: ~w', [PieceOption]),
     (PieceOption == 5 -> 
         write('Invalid piece option: 5'), nl, 
         validate_piece(GameState, Board, NewGameState)
-    ; PieceOption == "pass" ->
-        other_player(Player, NextPlayer),
-        (passed(NextPlayer) ->
-            NewGameState = [Board, NextPlayer, 'Scoring Phase'],
-            write('Placement phase is over! Going for the scoring phase!'), nl
-        ;
-            NewGameState = [Board, NextPlayer, 'Placement Phase']
-        )
-    ;
-        write('CheckPoint'), nl,
+    ; PieceOption \= 'pass' ->
         AdjustedRow1 is 11 - Row1,
         AdjustedRow2 is 11 - Row2,
         Tempcol is Col1 + 2,
@@ -46,6 +38,14 @@ validate_piece(GameState, Board, NewGameState) :-
         player_value_pieces(Player, _, Size, PieceOption),
         validate_move_PP(GameState, Col1-Row1,Col2-Row2, Size), !,
         place_piece(GameState, PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2, NewGameState)
+    ; 
+        other_player(Player, NextPlayer),
+        (passed(NextPlayer) ->
+            NewGameState = [Board, NextPlayer, 'Scoring Phase'],
+            write('Placement phase is over! Going for the scoring phase!'), nl
+        ;
+            NewGameState = [Board, NextPlayer, 'Placement Phase']
+        )
     ).  
 
 % Define a predicate to select a piece option with active selection

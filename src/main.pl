@@ -36,6 +36,7 @@ validate_move_PP(GameState, ColI-RowI, ColF-RowF, Size) :-
     check_bounds(Board, ColF-RowF),
     nth1(RowI, Board, RowList),
     nth1(ColI, RowList, Cell),
+    format('Move: ~d ~d ~d ~d ~d ', [RowI,ColI, ColF, RowF, Size]),
     (Cell == ' - ' ->
         (
             (ColF - ColI == Size ->
