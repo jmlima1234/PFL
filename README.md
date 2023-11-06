@@ -365,8 +365,8 @@ We tried to implement the bot algorithm intelligently but we didn't have the tim
 **Bibliography**
 
 All the rules and normal behaviour of the game were consulted here:
-    - https://www.youtube.com/watch?v=MwotyOed-Sw
-    - https://boardgamegeek.com/filepage/61537/isaac-english-rules
+- https://www.youtube.com/watch?v=MwotyOed-Sw
+- https://boardgamegeek.com/filepage/61537/isaac-english-rules
 
 </div>
 
