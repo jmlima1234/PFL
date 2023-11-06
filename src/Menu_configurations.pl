@@ -24,7 +24,7 @@ choose_difficulty(Bot) :-
     asserta((difficulty(Bot, Option))),
     nl.
 
-
+% option(+option)
 option(1):-
     clear,
     write('Human vs. Human\n'),
@@ -49,6 +49,7 @@ set_mode :-
     get_option(1, 3, 'Mode', Option), !,
     option(Option).
 
+% init_state(+Board)
 init_state(Board):-
     board(_, Board).
 
