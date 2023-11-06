@@ -7,7 +7,7 @@ clear_data :-
     retractall(difficulty(_, _)),
     retractall(last_move(_)).
 
-
+% read_number(+X)
 read_number(X):-
     repeat,
     read_line(Codes),
@@ -22,6 +22,7 @@ get_option(Min,Max,Context,Value):-
     (between(Min, Max, Value) -> ! ; write('\nInvalid input. Please enter a number between '), 
     write(Min), write(' and '), write(Max), nl, fail, format('~a between ~d and ~d: ', [Context, Min, Max]), nl).
 
+% get_move(+Player, -Col1-Row1-Col2-Row2, -Piece)
 get_move(Player, Col1-Row1-Col2-Row2, Piece) :-
     get_piece_or_pass(1, 6, Piece), % Get the piece value or 'pass'
     (Piece == 'pass' ->
@@ -41,7 +42,7 @@ get_move(Player, Col1-Row1-Col2-Row2, Piece) :-
         )
     ).
 
-
+% get_piece_or_pass(+Min, +Max, -Value)
 get_piece_or_pass(Min, Max, Value) :-
     write('Type "value" if you want to play or "pass" to pass: '),
     nl,
@@ -66,12 +67,14 @@ put_piece(Board, Col-Row, Piece, NewBoard) :-
     replace(Col, Piece, Line, NewLine),
     replace(Row, NewLine, Board, NewBoard).
 
+% choose_piece_to_remove(+PossibleMoves, -Index)
 choose_piece_to_remove(PossibleMoves, Index) :-
     write('Your possible moves are: '), nl, nl,
     print_list(PossibleMoves, 1),
     length(PossibleMoves, Length),
     get_option(1, Length, '\nChoose a piece to remove', Index).
 
+% print_list(+ListofMoves, -Index)
 print_list([], _).
 print_list([Row1-Col1-Col2-Row2-_-Value|T], Index) :-
     AdjustedRow1 is 11 - Row1,

@@ -5,6 +5,7 @@
 
 
 % Define a predicate to start scoring phase
+% scoringphase_start(+GameState, -NewGameState)
 scoringphase_start(GameState, NewGameState) :-
     [_, Player, _] = GameState,
     valid_moves_SP(GameState, Player, PossibleMoves),
@@ -30,11 +31,12 @@ scoringphase_start(GameState, NewGameState) :-
     remove_piece(Index, PossibleMoves, GameState, TempNewGameState),
     winning_condition(TempNewGameState, NewGameState).
 
+% valid_moves_SP(+GameState, +Player, -PossibleMoves)
 valid_moves_SP(GameState, Player, PossibleMoves) :-
     [_, _, _] = GameState,
     findall(Row1-Col1-Col2-Row2-PlayerP-Value, (last_move(Row1-Col1-Col2-Row2-PlayerP-Value), PlayerP == Player, valid_removal(Row1-Col1-Col2-Row2-_-Value, 1, Player)), PossibleMoves).
 
-
+% valid_removal(+Row1-Col1-Col2-Row2-_-Value, +Player, -Valid)
 valid_removal(Row1-Col1-Col2-Row2-_-Value, Valid, Player) :-
 
     (last_piece_removed(_-_-_-_-Player-ValueR) ->
@@ -70,6 +72,8 @@ valid_removal(Row1-Col1-Col2-Row2-_-Value, Valid, Player) :-
         )
     ).
 
+
+% remove_piece(+Index, +PossibleMoves, +GameState, -NewGameState)
 remove_piece(Index, PossibleMoves, GameState, NewGameState) :-
     nth1(Index, PossibleMoves, Row1-Col1-Col2-Row2-PlayerP-Value),
     removal_operation(Row1-Col1-Col2-Row2-PlayerP-Value, GameState),
@@ -81,6 +85,7 @@ remove_piece(Index, PossibleMoves, GameState, NewGameState) :-
     assert(board(Board, NewBoard)),
     NewGameState = [NewBoard, Player, Phase].
     
+% removal_operation(+Row1-Col1-Col2-Row2-_-Value, +GameState)
 removal_operation(Row1-Col1-Col2-Row2-_-Value, GameState) :-
     [_, Player, _] = GameState,
     pieces_same_line(Row1-Col1-Col2-Row2, Count),
@@ -88,6 +93,7 @@ removal_operation(Row1-Col1-Col2-Row2-_-Value, GameState) :-
     max_points(Value, Count, Counter, MaxPoints),
     handle_score_update(Player, MaxPoints).
 
+% pieces_same_line(+Row1-Col1-Col2-Row2, -Count)
 pieces_same_line(Row1-Col1-Col2-Row2, Count) :-
     (Row1 == Row2 -> 
         findall(_, (last_move(TempRow1-_-_-TempRow2-_-_), TempRow1 =< Row1, Row1 =< TempRow2), List),
@@ -99,6 +105,7 @@ pieces_same_line(Row1-Col1-Col2-Row2, Count) :-
         Count is TempCount - 1
     ).
 
+% counter_same_line(+Row1-Col1-Col2-Row2, -Counter)
 counter_same_line(Row1-Col1-Col2-Row2, Counter) :-
     (Row1 == Row2 -> 
         findall(_, (score_counter(_,_,Row), 
@@ -110,6 +117,7 @@ counter_same_line(Row1-Col1-Col2-Row2, Counter) :-
         length(List, Counter)
     ).
 
+% max_points(+Value, +Count, +Counter, -MaxPoints)
 max_points(Value, Count, Counter, MaxPoints) :-
     CMultiplier is 2 ^ Counter,  % Calculate the multiplier based on the number of counters
     (Count == 0 ->
@@ -118,6 +126,7 @@ max_points(Value, Count, Counter, MaxPoints) :-
         MaxPoints is Value*Count*CMultiplier  % Calculate the points
     ).
     
+% handle_score_update(+Player, -NewScore)
 handle_score_update(Player, NewScore) :-
     % Find the current score for the player
     player_score(Player, CurrentScore),
@@ -154,6 +163,7 @@ handle_score_update(Player, NewScore) :-
     update_score_counter(Player, PointsToAdd).
 
 
+% update_score_counter(+Player, -FinalScore)
 update_score_counter(Player, FinalScore) :-
     score_counter(Player, Col, Row),
 
@@ -176,7 +186,9 @@ update_score_counter(Player, FinalScore) :-
 
     retract(score_counter(Player, Col, Row)),
     assert(score_counter(Player, AdjustedCol, NewRow)).
+    
 
+% empty_cell(+OldBoard, +Row1, +Col1, +Row2, +Col2, -NewBoard)
 empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard) :-
     ( Row1 == Row2 ->
         nl,
@@ -191,10 +203,12 @@ empty_cell(OldBoard, Row1, Col1, Row2, Col2, NewBoard) :-
         transpose(TempBoard, NewBoard)
     ).
 
+% replace_row(+Row, Col1, Col2, -NewRow)
 replace_row(Row, Col1, Col2, NewRow) :-
     length(Row, Length),
     findall(Y, (between(1, Length, I), (I >= Col1, I =< Col2 -> Y = ' - '; nth1(I, Row, Y))), NewRow).
 
+% winning_condition(+GameState,-NewGameState)
 winning_condition(GameState, NewGameState) :-
     [Board, Player, Phase] = GameState,
     player_score(Player, Score),
@@ -233,11 +247,12 @@ winning_condition(GameState, NewGameState) :-
     ; NewGameState = [Board, NextPlayer, Phase]
     ).
    
-
+% game_over(+GameState, -Winner)
 game_over(GameState, Winner) :-
     [_, Winner, _] = GameState,
     display_board(GameState).
 
+% choose_move(+GameState, +Player, +Level, -Move)
 choose_move(GameState, Player, Level, Move) :-
     valid_moves_SP(GameState, Player, PossibleMoves),
     (Level == 1 ->
@@ -253,6 +268,7 @@ choose_move(GameState, Player, Level, Move) :-
     ).
 
 % Evaluate each move and return a list of pairs (Score-Move)
+% evaluate_moves(+ListofMoves, -ListofPairs_Score_move)
 evaluate_moves([], []).
 evaluate_moves([Move|Moves], [Score-Move|ScoredMoves]) :-
     evaluate_move(Move, Score),
@@ -260,6 +276,7 @@ evaluate_moves([Move|Moves], [Score-Move|ScoredMoves]) :-
 
 % Find the move with the maximum score
 % If there are multiple moves with the same maximum score, select the one with the smallest size
+% find_best_move(+PossibleMoves, -BestMove)
 find_best_move(PossibleMoves, BestMove) :-
     evaluate_moves(PossibleMoves, ScoredMoves),
     max_member(_-_, ScoredMoves),
@@ -267,10 +284,12 @@ find_best_move(PossibleMoves, BestMove) :-
     sort(ScoredSizedMoves, SortedScoredSizedMoves),
     last(SortedScoredSizedMoves, _-_-BestMove).
 
+% move_size(+Move, -Size)
 move_size(_-_-_-_-_-Value, Size) :-
     player_value_pieces(_, _, Size, Value).
 
 % Evaluate a move based on the value of the piece being removed and the points gained
+% evaluate_move(+Move, -Score)
 evaluate_move(Row1-Col1-Col2-Row2-_-Value, Score) :-
     pieces_same_line(Row1-Col1-Col2-Row2, Count),
     counter_same_line(Row1-Col1-Col2-Row2, Counter),

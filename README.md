@@ -1,9 +1,16 @@
 # PFL - TP1 - Isaac
 
 ## **Authors**
-- [João Macedo Lima](up202108891@fe.up.pt) - up202108891
-- [Tomás Eiras Silva Martins](up202108776@fe.up.pt) - up202108776
+- [João Macedo Lima](up202108891@fe.up.pt) - up202108891 (50%)
+- [Tomás Eiras Silva Martins](up202108776@fe.up.pt) - up202108776 (50%)
   
+<div style="text-align: justify;">
+<p>
+
+## **Game installation and execution**
+
+To procede with the installation and execution of the game, begin by downloading and extracting the contents of 'PFL_TP1_T10_Isaac_6.zip'. Subsequently, access the 'main.pl' file located within the 'src' directory, and consult the game utilizing either SICStus Prolog version 4.8 or the command line. Lastly, initiate the game by invoking the 'play/0' predicate.
+
 ## **Game description**
 - Isaac is played on a 10x10 board, and it has 2 phases. There are two players: Dark and Light. Each player has 15 rectangular tiles of 5 different sizes. Each tile has a score written on it.
 
@@ -265,9 +272,11 @@ The game works with 2 different cycles and it stops in case of someone wins or t
 
 ![](./images/gamecycle.png)
 
-In our choose_move/3 the player needs to inser the coordinates and all the validation occurs here (even if it is a bot or a player).
+In our validate_piece/3 the player needs to insert the coordinates and all the validation occurs here (even if it is a bot or a player).
 
-    //COLOCAR AS IMAGENS DO CHOOSE_MOVE
+![](./images/validate1.png)
+
+![](./images/validate2.png)
 
 It is considered a valid move:
 - 1 - The coordinates are inside the board
@@ -322,3 +331,5 @@ We tried to implement the bot algorithm intelligently but we didn't have the tim
 All the rules and normal behaviour of the game were consulted here:
     - https://www.youtube.com/watch?v=MwotyOed-Sw
     - https://boardgamegeek.com/filepage/61537/isaac-english-rules
+
+</div>
