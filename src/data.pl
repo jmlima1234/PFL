@@ -7,22 +7,23 @@
 :- dynamic difficulty/2.
 
 % users passed in PP
-% passed(+Player)
 :- dynamic passed/1.
 
-% board(+Size,-Board)
+% board(+Size, -Board)
 :- dynamic board/2.
 
-% player_value_pieces(+Player, +Number_Pieces, +Size, +Value)
+% player_value_pieces(+Player, +Number, -Size, -Value)
 :- dynamic player_value_pieces/4.
 
-% score_counter(+Player, +Col, +Row)
+% score_counter(+Player, -X, -Y)
 :- dynamic score_counter/3.
 
 % player_score(+Player, -Score)
 :- dynamic player_score/2.
 
+% counter(-Counter)
 :- dynamic counter/1.
+
 
 counter(0).
 
@@ -65,6 +66,8 @@ player_score('Dark', 0).
 other_player('Dark', 'Light').
 other_player('Light', 'Dark').
 
+
+% reset_game
 reset_game :-
     retractall(name_of(_,_)),
     retractall(difficulty(_,_)),
