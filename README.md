@@ -13,14 +13,14 @@
 - It ends when both players don't have space to put any of their tiles on the board. All the remaining tiles are set apart and serve the role of the tiebreaker. If both players get the same score by the end of the scoring phase, each player forms a line with all his unplayed tiles and the player with the longest line of the unplayed tiles wins the game. If the lines are of equal length, the player who started the game wins. Note that the length of each tile is not a round number of board squares but a little bit shorter.
 
 ### The scoring phase
-- At the beginning both players have 0 points. To indicate this both players put their score counter on the 00 square according to their own coordinates. If the mentioned square is under some tile, the score counter goes on top of this tile.
+- At the beginning both players have 0 points. To indicate this, both players put their score counter on the 00 square according to their own coordinates. If the mentioned square is under some tile, the score counter goes on top of this tile.
 - The first player that passed in the Placement phase begins the Scoring phase. The players take turns removing one of their tiles from the board. The removed tile must be at least as long as any tile previously removed by the same player (e.g. if a player has previously removed a 4-cells tile then he can't remove his 3-cells tiles anymore). A player may not remove a tile lying under a score counter (of any colour).
 - The result is the score earned by the removal of the tile. It indicates the maximum number of squares that the player's score counter may be moved.
 - The counter can’t be placed in the same cell as the opponent's counter.
 - The game ends when any player scores at least 100 points. If a player cannot remove any of his tiles on his turn, he passes and is out of the game. The game ends when both players have passed.
 
 ### End of the game 
-- The game ends when a player scores at least 100 points. If a player cannot remove one of his/her pieces, he/she passes and is out of the game. It ends when both players have passed.
+- The game ends when a player reaches 100 points or after both players cannot remove any more tiles.
 
 ## **Game Logic**
 
@@ -56,61 +56,46 @@ Number of each type of tile for each player:
 
 ```pl
 
-[[' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',],
- [' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - '' - ',]]
-
- ```
-
- ```
+[['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
+ ['90',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', '  0 |'],
+ ['80',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 10 |'],
+ ['70',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 20 |'],
+ ['60',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 30 |'],
+ ['50',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 40 |'],
+ ['40',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 50 |'],
+ ['30',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 60 |'],
+ ['20',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 70 |'],
+ ['10',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 80 |'],
+ ['0 ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 90 |'],
+ ['  ' , ' 0 ', ' 1 ', ' 2 ', ' 3 ', ' 4 ', ' 5 ', ' 6 ', ' 7 ', ' 8 ',' 9 ', '    |']]
 
  |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
  |    |  9  |  8  |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |     |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 90 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |   0 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 80 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  10 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 70 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  20 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 60 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  30 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 50 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  40 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 40 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  50 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 30 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  60 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 20 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  70 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 10 |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  80 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  | 0  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  -  |  90 |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
  |    |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |     |
- |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----| 
+ |----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
 
-Current player: Light
-
-Choose a piece (value) [3-7] to move:
-|- 
-
-Choose a column [0-9] and a row [0-9] to move the piece to:
-|- 
-
-Remaining pieces for Light pieces player:
- -5 pieces of value 1 (size 3)
- -4 pieces of value 2 (size 4)
- -3 pieces of value 3 (size 5)
- -2 pieces of value 4 (size 6)
- -1 pieces of value 6 (size 7)
+Current player: Dark
 
 Remaining pieces for Dark pieces player:
  -5 pieces of value 1 (size 3)
@@ -119,27 +104,36 @@ Remaining pieces for Dark pieces player:
  -2 pieces of value 4 (size 6)
  -1 pieces of value 6 (size 7)
 
-Counter position for Light player: (0, 0)
-Score for Light player: 0
+Remaining pieces for Light pieces player:
+ -5 pieces of value 1 (size 3)
+ -4 pieces of value 2 (size 4)
+ -3 pieces of value 3 (size 5)
+ -2 pieces of value 4 (size 6)
+ -1 pieces of value 6 (size 7)
 
-Counter position for Dark player: (0, 0)
-Score for Dark player: 0
+Counter position for Light player: (0, 0)
+Counter position for Dark player: (9, 9)
+
+Light player score: 0
+Dark player score: 0
 ```
 
 - Placement Phase (board with tiles):
 
 ```pl
 
-[[('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3),' - ',' - ', ('D'-2),' - ', ('L'-3)],
- [('L'-2), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('D'-2), ('D'-3), ('L'-3)],
- [('L'-2), ('D'-1), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-2), ('D'-3), ('L'-3)],
- [('L'-2), ('D'-1),' - ', ('D'-2), ('D'-2), ('D'-2), ('D'-2), ('D'-2), ('D'-3), ('L'-3)],
- [('L'-2), ('D'-1), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('L'-4), ('D'-3), ('L'-3)],
- [('D'-1), ('D'-1), ('D'-1), ('L'-2), ('L'-2), ('L'-2), ('L'-2),' - ', ('D'-3), ' - ' ],
- [('D'-1), ('L'-1), ('L'-1), ('L'-1), ('L'-1), ('D'-3), ('D'-3), ('D'-3), ('D'-3), ('D'-3)],
- [('D'-1), ('L'-1),' - ', ('L'-1), ('L'-1), ('L'-1),' - ', ('L'-1), ('L'-1), ('D'-1)],
- [('D'-1), ('L'-1), ('D'-2), ('D'-2), ('D'-2), ('D'-2),' - ', ('L'-1), ('L'-1), ('D'-1)],
- [('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('D'-6), ('L'-1), ('L'-1), ('D'-1)]]
+[['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
+ ['90',' D-1 ',' D-1 ',' D-1 ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', '  0 |'],
+ ['80',' D-1 ',' D-1 ',' D-1 ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 10 |'],
+ ['70',' L-2 ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', ' 20 |'],
+ ['60',' L-2 ',' - ',' - ',' - ',' - ',' - ',' L-6 ',' - ',' - ',' - ', ' 30 |'],
+ ['50',' L-2 ',' - ',' - ',' - ',' - ',' - ',' L-6 ',' - ',' - ',' - ', ' 40 |'],
+ ['40',' L-2 ',' - ',' - ',' - ',' - ',' - ',' L-6 ',' - ',' - ',' - ', ' 50 |'],
+ ['30',' D-1 ',' D-1 ',' D-1 ',' - ',' - ',' L-6 ',' - ',' - ',' - ',' - ', ' 60 |'],
+ ['20',' - ',' - ',' - ',' - ',' - ',' - ',' L-6 ',' - ',' - ',' - ', ' 70 |'],
+ ['10',' - ',' - ',' - ',' - ',' - ',' - ',' L-6 ',' - ',' - ',' - ', ' 80 |'],
+ ['0 ',' - ',' - ',' - ',' - ',' - ',' - ',' L-6 ',' - ',' - ',' - ', ' 90 |'],
+ ['  ' , ' 0 ', ' 1 ', ' 2 ', ' 3 ', ' 4 ', ' 5 ', ' 6 ', ' 7 ', ' 8 ',' 9 ', '    |']]
  ```
 
 ```
@@ -276,16 +270,16 @@ In our choose_move/3 the player needs to inser the coordinates and all the valid
     //COLOCAR AS IMAGENS DO CHOOSE_MOVE
 
 It is considered a valid move:
-    1- As coordenadas estão dentro do board
-    2- As coordenadas correspondam apenas a linhas horizontais e verticais
-    3- Placement phase:
-        - Antes de colocar as coordenadas apenas se pode colocar 'pass'(caso queira passar a jogada) ou 'value' (caso queira colocar uma peça)
-        - As células que a peça vai ocupar estão vazias
-        - O valor indicado pelo o utilizador corresponde a uma peça que existe
-    4- Scoring phase:
-        - O score counter não pode ser colocado numa posição que indique uma pontuação superior àquela que tem no momento
-        - Apenas pode retirar peças que estão colocadas no board
-        - O utilizador tem de escolher uma peça específica que esteja na lista apresentada
+- 1 - The coordinates are inside the board
+- 2 - The coordinates correspond to only vertical or horizontal lines
+- 3 - Placement phase:
+    - Before placing the coordinates the player can only put 'pass' (if he wants to pass the turn) or 'value' (if he wants to place a piece)
+    - The cells that the piece is going to occupy are empty
+    - The value indicated by the user corresponds to a piece that exists
+- 4 - Scoring phase:
+    - The score counter cant be placed on a position that indicates a score higher than the one that the player has at the moment
+    - Can only remove pieces that are in the board
+    - The user need to choose a piece that is referred in the list of pieces
 
 After checking everything the place_piece/7 is called inside the choose_move/3 function and the piece is placed and the GameState is updated
 
@@ -300,25 +294,28 @@ The list of valid moves is obtained using the predicate findall/3 with the objec
     
 
 **End of Game**
-In the scoring phase there is a predicate that always check if the game has reached its end (one of the players reached 100 points or there are no more possible moves for each player). 
+In the scoring phase there is a predicate that always check if the game has reached its end (one of the players reached 100 points or there are no more possible moves for each player). This is done with the predicate winnin_condition/2, that checks if the game has ended and who won. Then, the predicate game_over/2 is called and the game ends.
 
 ![](./images/winning_condition.png)
 
+**Game State Evaluation**
+In our main cycle game_cycle/1, whenever the state of the game is updated it evaluates and decide the flow of the game. This bassicaly would do the same as value(+GameState, +Player, -Value). We can check wich phase the game is with the GameState and so we can always know what state we are in.
 
-**Bot's Play**
 
+**Computer Plays**
 For the bots to decide what their next move is we chose 2 methods: random and greedy. For the random method he just picks random coordinates and puts the piece in the board(placement phase) or removes from it (scoring phase).
 
 // FOTO DAS DUAS FUNÇÕES
 
-For the greedy method, we changed a little bit and we opted for a specific approach. During the placement phase, the bot will always put his pieces on a random way in the board. During the scoring phase, the bot searches for the move that gives him the biggest amount of points. We use the find_best_move/2 predicate for that
+For the greedy method, we changed a little bit and we opted for a specific approach. During the placement phase, the bot will always put his pieces on a random way in the board. During the scoring phase, the bot searches for the move that gives him the biggest amount of points. We use the find_best_move/2 predicate for that.
 
 ![](./images/find_best_move.png)
 
 
 **Conclusions**
 
-We think that the Isaac game wasn't a success. We managed to implement the human vs human, human vs bot and bot vs bot modes, but we didn't have the time to implement a good and well structured greedy bot. We found lots of difficulties on finding a greedy strategy for the placement phase and because of that, we didn't have the time to finish the project and implement the correct greedy bot. That is why we think the most challenging part of this project was the implementation of the bot. But, besides that, we were capable to consolidate our knowledge during the practical and theoretical classes.
+We think that the Isaac game wasn't a success at all. Although we managed to implement the human vs human mode, working perfectly and in a user-friendly way, both human vs bot mode and bot vs bot mode, were implemented with some flaws. The human vs bot mode is working but the placing phase is not working in an smart way. The bot vs bot mode is not working at all and we couldn't find a way to make it work. 
+We tried to implement the bot algorithm intelligently but we didn't have the time to implement a good and well structured greedy bot. We found lots of difficulties on finding a greedy strategy for the placement phase and because of that, we didn't have the time to finish the project with an algorithm that worked well in the Placement Phase. That is why we think the most challenging part of this project was the implementation of the bot. But, besides that, we were capable to do a good Player vs Player game mode and we are able to consolidate the knowledge of Prolog that we have been acquiring during the semester.
 
 **Bibliography**
 
