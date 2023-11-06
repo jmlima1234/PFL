@@ -128,7 +128,9 @@ handle_score_update(Player, NewScore) :-
     (ScoreDiff >= 0 ->
         (difficulty(Player, Level) ->
             (Level == 1 ->
-                random(0, ScoreDiff, PointsToAdd)
+                trace,
+                random(0, ScoreDiff, PointsToAdd),
+                notrace
             ;
                 PointsToAdd is ScoreDiff
             )

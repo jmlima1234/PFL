@@ -17,6 +17,10 @@
 
 :- dynamic player_score/2.
 
+:- dynamic counter/1.
+
+counter(0).
+
 
 board(12,[
     ['  ' , ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
@@ -64,6 +68,9 @@ reset_game :-
     retractall(player_value_pieces(_,_,_,_)),
     retractall(score_counter(_,_,_)),
     retractall(player_score(_,_)),
+    retractall(counter(_)),
+
+    assert(counter),
 
     assert(board(12,[['  ', ' 9 ', ' 8 ', ' 7 ', ' 6 ', ' 5 ', ' 4 ', ' 3 ', ' 2 ', ' 1 ',' 0 ', '    |'],
                      ['90',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ',' - ', '  0 |'],
