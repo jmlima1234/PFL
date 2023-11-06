@@ -28,24 +28,18 @@ choose_difficulty(Bot) :-
 option(1):-
     clear,
     write('Human vs. Human\n'),
-    nl,
-    asserta((name_of(player1, 'Dark'))),
-    asserta((name_of(player2, 'Light'))), !.
+    nl, !.
 option(2):-
     clear,
     write('Human vs. Bot\n'),
-    nl,
-    asserta((name_of(player1, 'Dark'))),
-    asserta((name_of(player2, 'Light'))), !,
-    choose_difficulty(player2).
+    nl,!,
+    choose_difficulty('Light').
 option(3):-
     clear,
     write('Bot vs. Bot\n'),
-    nl,
-    asserta((name_of(player1, 'Dark'))),
-    asserta((name_of(player2, 'Light'))), !,
-    choose_difficulty(player1),
-    choose_difficulty(player2).
+    nl,!,
+    choose_difficulty('Dark'),
+    choose_difficulty('Light').
 
 
 % set_mode/0

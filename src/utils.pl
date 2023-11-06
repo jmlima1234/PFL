@@ -36,7 +36,7 @@ get_move(Player, Col1-Row1-Col2-Row2, Piece) :-
             (TempCol1 > TempCol2 -> Col1 = TempCol2, Col2 = TempCol1 ; Col1 = TempCol1, Col2 = TempCol2),
             (TempRow1 < TempRow2 -> Row1 = TempRow2, Row2 = TempRow1 ; Row1 = TempRow1, Row2 = TempRow2)
         ;
-            write('Invalid piece. You already played all the pieces with this value!'), nl,
+            write('Invalid piece. You already played all the pieces with this value!'), nl, nl,
             get_move(Player, Col1-Row1-Col2-Row2, Piece)
         )
     ).
@@ -49,7 +49,13 @@ get_piece_or_pass(Min, Max, Value) :-
     (String == "pass" ->
         Value = 'pass'
     ; String == "value" ->  
-        get_option(Min, Max, '\nPiece value', Value)
+        get_option(Min, Max, '\nPiece value', TempValue),
+        (TempValue == 5 ->
+            write('Invalid piece value. You cannot choose a piece with value 5. Please try again.'), nl, nl,
+            get_piece_or_pass(Min, Max, Value)
+        ;
+            Value = TempValue
+        )
     ;   write('\nInvalid input. '),
         get_piece_or_pass(Min, Max, Value)
     ).
