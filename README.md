@@ -266,3 +266,31 @@ With the GameState initialized, we can say that the configurations process is 10
 The predicate 'display_rows/2' is responsible for printing the pieces at the right coordinates. In order to generalize the relations, it is considered 'L-1' to represent the piece of value 1 from the player 'Light' and the same thing applies to the 'Dark' player.
 
 **Move Validation and Execution**
+
+The game works with 2 different cycles and it stops in case of someone wins or the game is over. There is one cycle for the placement phase and another one for the scoring phase.
+
+    ![](./images/gamecycle.png)
+
+In our choose_move/3 the player needs to inser the coordinates and all the validation occurs here (even if it is a bot or a player).
+
+    //COLOCAR AS IMAGENS DO CHOOSE_MOVE
+
+It is considered a valid move:
+    1- As coordenadas estão dentro do board
+    2- As coordenadas correspondam apenas a linhas horizontais e verticais
+    3- Placement phase:
+        - Antes de colocar as coordenadas apenas se pode colocar 'pass'(caso queira passar a jogada) ou 'value' (caso queira colocar uma peça)
+        - As células que a peça vai ocupar estão vazias
+        - O valor indicado pelo o utilizador corresponde a uma peça que existe
+    4- Scoring phase:
+        - O score counter não pode ser colocado numa posição que indique uma pontuação superior àquela que tem no momento
+        - Apenas pode retirar peças que estão colocadas no board
+        - O utilizador tem de escolher uma peça específica que esteja na lista apresentada
+
+After checking everything the place_piece/7 is called inside the choose_move/3 function and the piece is placed and the GameState is updated
+
+    ![](./images/place_piece.png)
+
+**List of Valid Moves**
+
+

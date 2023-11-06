@@ -30,10 +30,12 @@ choose_move_PP(GameState, Col1-Row1-Col2-Row2, NewGameState) :-
         choose_move_PP(GameState, Player, Level, Move),
         [Col1,Row1,Col2,Row2,Size,Piece] = Move,
         player_value_pieces(Player, Number, Size, Piece),
-        (Number == 0 ->
+        (Number == 0 -> 
             choose_move_PP(GameState, ColI-RowI-ColF-RowF, NewGameState)
-        ; validate_move_PP(GameState,Col1-Row1,Col2-Row2, Size) ->
+        ;validate_move_PP(GameState,Col1-Row1,Col2-Row2, Size) ->
             place_piece(GameState,Piece,Row1,Col1,Col2,Row2,NewGameState)
+        ;
+            choose_move_PP(GameState, ColI-RowI-ColF-RowF, NewGameState)
         )
     ;
         get_move(Player, Col1-Row1-Col2-Row2, PieceOption),
@@ -68,7 +70,7 @@ choose_move_PP(GameState, Player, 1, Move):-
     random(1,3,Direction),
     (Direction == 1 ->
         random(2,11,RandomRow),
-        random(1,6,RandomValue),
+        random(1,5,RandomValue),
         (RandomValue == 5 ->
             RandomValue2 is RandomValue +1;
             RandomValue2 is RandomValue
@@ -79,7 +81,7 @@ choose_move_PP(GameState, Player, 1, Move):-
         Move = [RandomColI,RandomRow,RandomColF,RandomRow,Size,RandomValue2]
     ;
         random(2,11,RandomCol),
-        random(1,6,RandomValue),
+        random(1,5,RandomValue),
         (RandomValue == 5 ->
             RandomValue2 is RandomValue +1;
             RandomValue2 is RandomValue
