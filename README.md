@@ -9,7 +9,7 @@
 
 ## **Game installation and execution**
 
-To procede with the installation and execution of the game, begin by downloading and extracting the contents of 'PFL_TP1_T10_Isaac_6.zip'. Subsequently, access the 'main.pl' file located within the 'src' directory, and consult the game utilizing either SICStus Prolog version 4.8 or the command line. Lastly, initiate the game by invoking the 'play/0' predicate.
+To procede with the installation and execution of the game, begin by downloading and extracting the contents of 'PFL_TP1_T10_Isaac_6.zip'. Subsequently, consult the 'main.pl' file located within the 'src' directory, utilizing either SICStus Prolog version 4.8 or the command line. Lastly, initiate the game by invoking the 'play/0' predicate.
 
 ## **Game description**
 - Isaac is played on a 10x10 board, and it has 2 phases. There are two players: Dark and Light. Each player has 15 rectangular tiles of 5 different sizes. Each tile has a score written on it.
