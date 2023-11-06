@@ -38,13 +38,21 @@ validate_move_PP(GameState, ColI-RowI, ColF-RowF, Size) :-
                 NewSize is Size - 1,
                 (NewSize > 0 -> validate_move_PP(GameState, ColI-Row, ColF-RowF, NewSize) ; write('Valid Move!'))
             ; 
-                write('\nInvalid Move! Size is incorrect\n'), nl,
-                fail
+                (difficulty(Player, Level) -> 
+                    fail
+                ;
+                    write('Invalid Move! Size is incorrect\n'),
+                    fail
+                )
             )
         )
-    ; % Cell is not empty
-        write('\nInvalid Move! Cell is not empty\n'), nl,
-        fail
+    ; % Cell is not empt
+        (difficulty(Player, Level) -> 
+            fail
+        ;
+            write('Invalid Move! Cell is not empty\n'),
+            fail
+        )
     ).
 
 

@@ -22,12 +22,32 @@ display_players_pieces([Value-Count-Size|Rest]) :-
     format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
     display_players_pieces(Rest).
 
+
 validate_piece(GameState, Board, NewGameState) :-
     [Board, Player, _] = GameState,
-    write('Starting validate'), nl,
+    
     (difficulty(Player, Level) ->
-        get_move(GameState, Player, Level, Col1-Row1-Col2-Row2)
-        ;
+        counter(Counter),
+        repeat,
+        choose_move_PP(GameState, Player, Level, Move),
+        [Col1,Row1,Col2,Row2,Size,Value] = Move,
+        player_value_pieces(Player, _, Size, Value),
+        (validate_move_PP(GameState, Col1-Row1,Col2-Row2, Size) ->
+            PieceOption is Value,
+            !
+        ; 
+            retract(counter(Counter)),
+            NewCounter is Counter + 1,
+            assert(counter(NewCounter)),
+            (Counter >= 20 ->
+                PieceOption = 'pass', !,
+                retract(counter(_)),
+                assert(counter(0))
+            ;
+                fail
+            )
+        )
+    ;
         get_move(Player, Col1-Row1-Col2-Row2, PieceOption)
     ),
     (PieceOption == 5 -> 
@@ -40,7 +60,6 @@ validate_piece(GameState, Board, NewGameState) :-
         Tempcol2 is Col2 + 2,
         player_value_pieces(Player, _, Size, PieceOption),
         (validate_move_PP(GameState, Tempcol-AdjustedRow1,Tempcol2-AdjustedRow2, Size) ->
-            write('Valid move!'), nl,
             place_piece(GameState, PieceOption, AdjustedRow1, Tempcol, Tempcol2, AdjustedRow2, NewGameState)
         ; 
             validate_piece(GameState, Board, NewGameState)
@@ -57,12 +76,24 @@ validate_piece(GameState, Board, NewGameState) :-
         )
     ).  
 
-% Define a predicate to select a piece option with active selection
-pieceoption(PieceOption) :-
-    (PieceOption =:= 5 -> write('Invalid piece option: 5'), nl, fail; true),
-    between(1, 6, PieceOption),
-    current_player(Player),
-    player_value_pieces(Player, _, _, PieceOption), !. 
+choose_move_PP(_, Player, _, Move):-
+    random(0,2,Direction),
+    random(1,6,RandomValue),
+    (RandomValue == 5 ->
+        RandomValue2 is RandomValue +1;
+        RandomValue2 is RandomValue
+    ),
+    random(1,6,Size),
+    player_value_pieces(Player, _, Size, RandomValue2),
+    random(2,11,RandomRow),
+    random(2,11,RandomCol),
+    (Direction == 0 ->
+        RandomColF is RandomCol + Size - 1,
+        Move = [RandomCol,RandomRow,RandomColF,RandomRow,Size,RandomValue2]
+    ;
+        RandomRowF is RandomRow + Size - 1,
+        Move = [RandomCol,RandomRow,RandomCol,RandomRowF,Size,RandomValue2]
+    ).
 
 place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState) :-
     clear,
