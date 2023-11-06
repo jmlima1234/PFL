@@ -13,17 +13,21 @@ display_remaining_pieces(Player) :-
     display_remaining_pieces_list(Opponent),
     nl.
 
+% display_remaining_pieces_list(+Player)
 display_remaining_pieces_list(Player) :-
     findall(Value-Count-Size, player_value_pieces(Player, Count, Size, Value), PlayerPieces),
     keysort(PlayerPieces, SortedPlayerPieces),
     format('Remaining pieces for ~w pieces player:~n', [Player]),
     display_players_pieces(SortedPlayerPieces).
 
+% display_players_pieces(+ListofPieces)
 display_players_pieces([]).
 display_players_pieces([Value-Count-Size|Rest]) :-
     format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
     display_players_pieces(Rest).
 
+% choose_move_PP(+GameState, +Col1-Row1-Col2-Row2, -NewGameState)
+% choose_move_PP(+GameState, +Player, +Level, -Move)
 choose_move_PP(GameState, Col1-Row1-Col2-Row2, NewGameState) :-
     [Board, Player, _] = GameState,
     (difficulty(Player, Level) ->
@@ -66,7 +70,7 @@ choose_move_PP(GameState, Col1-Row1-Col2-Row2, NewGameState) :-
             )
         ) 
     ). 
-choose_move_PP(GameState, Player, 1, Move):-
+choose_move_PP(GameState, Player, Level, Move):-
     random(1,3,Direction),
     (Direction == 1 ->
         random(2,11,RandomRow),
@@ -93,12 +97,14 @@ choose_move_PP(GameState, Player, 1, Move):-
     ).
 
 % Define a predicate to select a piece option with active selection
+% pieceoption(+PieceOption)
 pieceoption(PieceOption) :-
     (PieceOption =:= 5 -> write('Invalid piece option: 5'), nl, fail; true),
     between(1, 6, PieceOption),
     current_player(Player),
     player_value_pieces(Player, _, _, PieceOption), !. 
 
+% place_piece(+GameState, +PieceOption, +Row1, +Col1, +Col2, +Row2, -NewGameState)
 place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState) :-
     clear,
     [Board, Player, Phase] = GameState,
@@ -118,6 +124,7 @@ place_piece(GameState, PieceOption, Row1, Col1, Col2, Row2, NewGameState) :-
     ).
 
 % Define a predicate to replace the value on the board at the specified row and column
+% replace(+OldBoard, +Row1, +Col2, +Row2, +Col1, +Value, -NewBoard, -Player)
 replace(OldBoard, Row1, Col2, Row2, Col1, Value, NewBoard, Player) :-
     ( Row1 == Row2 ->
         nth1(Row1, OldBoard, OldRow),
@@ -139,6 +146,7 @@ replace_list([H|T], I, X, [H|R]) :-
     replace_list(T, NI, X, R).
 
 % Define a predicate to replace a range of values at the specified indices in a row
+% replace_row(+Row, +Col1, +Col2, +X, +Player, -NewRow)
 replace_row(Row, Col1, Col2, X, Player, NewRow) :-
     length(Row, Length),
     number_chars(X, XChars),

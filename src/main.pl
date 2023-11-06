@@ -69,6 +69,8 @@ game_cycle(GameState):-
     scoringphase_start(GameState, NewGameState), !,
     game_cycle(NewGameState).
 
+% play/0
+% initiate the game
 play :-
     clear_data,
     configurations(GameState), !,

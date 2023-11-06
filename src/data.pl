@@ -7,14 +7,19 @@
 :- dynamic difficulty/2.
 
 % users passed in PP
+% passed(+Player)
 :- dynamic passed/1.
 
+% board(+Size,-Board)
 :- dynamic board/2.
 
+% player_value_pieces(+Player, +Number_Pieces, +Size, +Value)
 :- dynamic player_value_pieces/4.
 
+% score_counter(+Player, +Col, +Row)
 :- dynamic score_counter/3.
 
+% player_score(+Player, -Score)
 :- dynamic player_score/2.
 
 

@@ -291,6 +291,39 @@ After checking everything the place_piece/7 is called inside the choose_move/3 f
 
     ![](./images/place_piece.png)
 
+
 **List of Valid Moves**
+
+The list of valid moves is obtained using the predicate findall/3 with the objective predicate valid_moves_SP/3. Besides that, we used the find_best_move/2 to evaluate the next move for the bot with the difficulty set as 'Hard'. The other type of bot is completly random.
+
+    ![](./images/Valid_moves_SP.png)
+    
+
+**End of Game**
+In the scoring phase there is a predicate that always check if the game has reached its end (one of the players reached 100 points or there are no more possible moves for each player). 
+
+  ![](./images/winning_condition.png)
+
+
+**Bot's Play**
+
+For the bots to decide what their next move is we chose 2 methods: random and greedy. For the random method he just picks random coordinates and puts the piece in the board(placement phase) or removes from it (scoring phase).
+
+// FOTO DAS DUAS FUNÇÕES
+
+For the greedy method, we changed a little bit and we opted for a specific approach. During the placement phase, the bot will always put his pieces on a random way in the board. During the scoring phase, the bot searches for the move that gives him the biggest amount of points. We use the find_best_move/2 predicate for that
+
+    ![](./images/find_best_move.png)
+
+
+**Conclusions**
+
+We think that the Isaac game wasn't a success. We managed to implement the human vs human, human vs bot and bot vs bot modes, but we didn't have the time to implement a good and well structured greedy bot. We found lots of difficulties on finding a greedy strategy for the placement phase and because of that, we didn't have the time to finish the project and implement the correct greedy bot. That is why we think the most challenging part of this project was the implementation of the bot. But, besides that, we were capable to consolidate our knowledge during the practical and theoretical classes.
+
+**Bibliography**
+
+All the rules and normal behaviour of the game were consulted here:
+    - https://www.youtube.com/watch?v=MwotyOed-Sw
+    - https://boardgamegeek.com/filepage/61537/isaac-english-rules
 
 
