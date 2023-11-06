@@ -328,7 +328,7 @@ After checking everything the place_piece/7 is called inside the choose_move/3 f
 
 The list of valid moves is obtained using the predicate findall/3 with the objective predicate valid_moves_SP/3. Besides that, we used the find_best_move/2 to evaluate the next move for the bot with the difficulty set as 'Hard'. The other type of bot is completly random.
 
-![](./images/Valid_moves_SP.png)
+![](./images/Valid_mSP.png)
     
 
 **End of Game**
