@@ -79,7 +79,7 @@ validate_piece(GameState, Board, NewGameState) :-
             NewGameState = [Board, NextPlayer, 'Placement Phase']
         )
     ).  
-
+% choose_move_PP(+GameState,+Player,+Level,-Move)
 choose_move_PP(_, Player, _, Move):-
     random(0,2,Direction),
     random(1,6,RandomValue),
