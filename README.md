@@ -343,12 +343,19 @@ In our main cycle game_cycle/1, whenever the state of the game is updated it eva
 **Computer Plays**
 For the bots to decide what their next move is we chose 2 methods: random and greedy. For the random method he just picks random coordinates and puts the piece in the board(placement phase) or removes from it (scoring phase).
 
-// FOTO DAS DUAS FUNÇÕES
+![](images/placement_bot.png)
 
-For the greedy method, we changed a little bit and we opted for a specific approach. During the placement phase, the bot will always put his pieces on a random way in the board. During the scoring phase, the bot searches for the move that gives him the biggest amount of points. We use the find_best_move/2 predicate for that.
+![](images/chose_random_pp.png)
 
-![](./images/find_best_move.png)
+In the functions above we can see that a random move is trying to be found. Then when a valid one is found it is placed on the board. In the placement phase we decided that a greedy algorithm would be unfizible and because of that we decided to use a random algorithm even on level 2.
 
+![](images/bot_play_sp.png)
+
+![](images/choose_move_SP.png)
+
+![](images/hard_bot.png)
+
+These functions are used to calculate the next move for the bot. If the bot level = 1, it means it is choosing pieces randomly and if the bot level = 2, it means it is choosing in a greedy way, removing the piece that gives the biggest amount of points. As it is possible to understand, we use find_best_move/2 to find the best move for the bot.
 
 **Conclusions**
 
@@ -362,3 +369,6 @@ All the rules and normal behaviour of the game were consulted here:
     - https://boardgamegeek.com/filepage/61537/isaac-english-rules
 
 </div>
+
+
+
