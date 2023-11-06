@@ -243,26 +243,85 @@ Player Dark wins!
 Before initiating the game, the user(s) must configurate their match. They need to choose the mode (human/human, human/bot or bot/bot) and then the difficulty of the bots, in case the user selected one of the modes that requires a bot. There is the random and hard difficulties.
 In any case, the validation of the user inputs and every possible play are secured. This is a possible interaction:
 
-    ![](./images/menu.png)
+![](./images/menu.png)
 
-    ![](./images/menu02.png)
+![](./images/menu02.png)
 
 The validation of menu inputs is performed through the generic predicate 'get_option/4.' This predicate is also essential in validating coordinate inputs.
 
-    ![](./images/get_option.png)
+![](./images/get_option.png)
 
 Regarding Bot players, the difficulty ('difficulty/2') is dynamically placed in the fact database to be accessible in all predicates.
 
-    ![](./images/choose_difficulty.png)
+![](./images/choose_difficulty.png)
 
 Besides that, the configuration process will be automatically finished since the board has a fixed size and the initial state will be initialized. 
 
-    ![](./images/configurations.png)
+![](./images/configurations.png)
 
 With the GameState initialized, we can say that the configurations process is 100% complete. After that, the board will be showed. In each iteration, this action unleashed by the predicate 'display_board/1'.
 
-    ![](./images/display_board.png)
+![](./images/display_board.png)
 
 The predicate 'display_rows/2' is responsible for printing the pieces at the right coordinates. In order to generalize the relations, it is considered 'L-1' to represent the piece of value 1 from the player 'Light' and the same thing applies to the 'Dark' player.
 
 **Move Validation and Execution**
+
+The game works with 2 different cycles and it stops in case of someone wins or the game is over. There is one cycle for the placement phase and another one for the scoring phase.
+
+![](./images/gamecycle.png)
+
+In our choose_move/3 the player needs to inser the coordinates and all the validation occurs here (even if it is a bot or a player).
+
+    //COLOCAR AS IMAGENS DO CHOOSE_MOVE
+
+It is considered a valid move:
+    1- As coordenadas estão dentro do board
+    2- As coordenadas correspondam apenas a linhas horizontais e verticais
+    3- Placement phase:
+        - Antes de colocar as coordenadas apenas se pode colocar 'pass'(caso queira passar a jogada) ou 'value' (caso queira colocar uma peça)
+        - As células que a peça vai ocupar estão vazias
+        - O valor indicado pelo o utilizador corresponde a uma peça que existe
+    4- Scoring phase:
+        - O score counter não pode ser colocado numa posição que indique uma pontuação superior àquela que tem no momento
+        - Apenas pode retirar peças que estão colocadas no board
+        - O utilizador tem de escolher uma peça específica que esteja na lista apresentada
+
+After checking everything the place_piece/7 is called inside the choose_move/3 function and the piece is placed and the GameState is updated
+
+![](./images/place_piece.png)
+
+
+**List of Valid Moves**
+
+The list of valid moves is obtained using the predicate findall/3 with the objective predicate valid_moves_SP/3. Besides that, we used the find_best_move/2 to evaluate the next move for the bot with the difficulty set as 'Hard'. The other type of bot is completly random.
+
+![](./images/Valid_moves_SP.png)
+    
+
+**End of Game**
+In the scoring phase there is a predicate that always check if the game has reached its end (one of the players reached 100 points or there are no more possible moves for each player). 
+
+![](./images/winning_condition.png)
+
+
+**Bot's Play**
+
+For the bots to decide what their next move is we chose 2 methods: random and greedy. For the random method he just picks random coordinates and puts the piece in the board(placement phase) or removes from it (scoring phase).
+
+// FOTO DAS DUAS FUNÇÕES
+
+For the greedy method, we changed a little bit and we opted for a specific approach. During the placement phase, the bot will always put his pieces on a random way in the board. During the scoring phase, the bot searches for the move that gives him the biggest amount of points. We use the find_best_move/2 predicate for that
+
+![](./images/find_best_move.png)
+
+
+**Conclusions**
+
+We think that the Isaac game wasn't a success. We managed to implement the human vs human, human vs bot and bot vs bot modes, but we didn't have the time to implement a good and well structured greedy bot. We found lots of difficulties on finding a greedy strategy for the placement phase and because of that, we didn't have the time to finish the project and implement the correct greedy bot. That is why we think the most challenging part of this project was the implementation of the bot. But, besides that, we were capable to consolidate our knowledge during the practical and theoretical classes.
+
+**Bibliography**
+
+All the rules and normal behaviour of the game were consulted here:
+    - https://www.youtube.com/watch?v=MwotyOed-Sw
+    - https://boardgamegeek.com/filepage/61537/isaac-english-rules
