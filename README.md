@@ -271,9 +271,11 @@ The game works with 2 different cycles and it stops in case of someone wins or t
 
 ![](./images/gamecycle.png)
 
-In our choose_move/3 the player needs to inser the coordinates and all the validation occurs here (even if it is a bot or a player).
+In our validate_piece/3 the player needs to insert the coordinates and all the validation occurs here (even if it is a bot or a player).
 
-    //COLOCAR AS IMAGENS DO CHOOSE_MOVE
+![](./images/validate1.png)
+
+![](./images/validate2.png)
 
 It is considered a valid move:
     1- As coordenadas estão dentro do board
@@ -307,9 +309,7 @@ In the scoring phase there is a predicate that always check if the game has reac
 
 **Bot's Play**
 
-For the bots to decide what their next move is we chose 2 methods: random and greedy. For the random method he just picks random coordinates and puts the piece in the board(placement phase) or removes from it (scoring phase).
-
-// FOTO DAS DUAS FUNÇÕES
+For the bots to decide what their next move is, we chose 2 methods: random and greedy. For the random method he just picks random coordinates and puts the piece in the board(placement phase) or removes from it (scoring phase).
 
 For the greedy method, we changed a little bit and we opted for a specific approach. During the placement phase, the bot will always put his pieces on a random way in the board. During the scoring phase, the bot searches for the move that gives him the biggest amount of points. We use the find_best_move/2 predicate for that
 

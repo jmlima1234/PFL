@@ -22,7 +22,7 @@ display_players_pieces([Value-Count-Size|Rest]) :-
     format(' -~w pieces of value ~w (size ~w)~n', [Count, Value, Size]),
     display_players_pieces(Rest).
 
-
+% validate_piece(+GameState,+Board,-NewGameState)
 validate_piece(GameState, Board, NewGameState) :-
     [Board, Player, _] = GameState,
     
