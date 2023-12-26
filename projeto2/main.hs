@@ -15,23 +15,23 @@ data Inst =
   deriving Show
 type Code = [Inst]
 
-type Stack = [Value]
+type Stack = [Integer]
 
-type State = [(String, Value)]
+type State = [(String, Integer)]
 
 createEmptyStack :: Stack
 createEmptyStack = [] -- TODO, Uncomment the function signature after defining Stack
 
+stack2Str :: Stack -> String
+stack2Str stack = intercalate "," (map show stack) -- TODO, Uncomment all the other function type declarations as you implement them
+
 createEmptyState :: State
 createEmptyState = [] -- TODO, Uncomment the function signature after defining State
 
-stack2Str :: Stack -> String
-stack2Str = intercalate "," (map show stack) -- TODO, Uncomment all the other function type declarations as you implement them
+state2Str :: State -> String
+state2Str state = intercalate "," [var ++ "=" ++ show val | (var, val) <- sortBy (compare `on` fst) state]
 
---state2Str :: State -> String
-state2Str = undefined -- TODO
-
---run :: (Code, Stack, State) -> (Code, Stack, State)
+-- run :: (Code, Stack, State) -> (Code, Stack, State)
 run = undefined -- TODO
 
 -- Part 2
