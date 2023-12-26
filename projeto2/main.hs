@@ -3,9 +3,9 @@
 
 -- Part 1
 
-import Data.List (intercalate)
+import Data.List (sortOn, intercalate)
 import qualified Data.List as List
-
+import Data.List (sort)
 import Data.Function (on)
 
 -- Do not modify our definition of Inst and Code
@@ -15,7 +15,7 @@ data Inst =
   deriving Show
 type Code = [Inst]
 
-type Stack = [Integer]
+type Stack = [Inst]
 
 type State = [(String, Integer)]
 
@@ -23,13 +23,19 @@ createEmptyStack :: Stack
 createEmptyStack = [] -- TODO, Uncomment the function signature after defining Stack
 
 stack2Str :: Stack -> String
-stack2Str stack = intercalate "," (map show stack) -- TODO, Uncomment all the other function type declarations as you implement them
+stack2Str stack = intercalate "," (map instToStr (reverse stack))
+  where
+    instToStr :: Inst -> String
+    instToStr (Push n) = show n
+    instToStr Tru = "True"
+    instToStr Fals = "False"
+    instToStr inst = show inst
 
 createEmptyState :: State
 createEmptyState = [] -- TODO, Uncomment the function signature after defining State
 
 state2Str :: State -> String
-state2Str state = intercalate "," [var ++ "=" ++ show val | (var, val) <- sortBy (compare `on` fst) state]
+state2Str state = intercalate "," (sortOn id (map (\(var, val) -> var ++ "=" ++ show val) state))
 
 -- run :: (Code, Stack, State) -> (Code, Stack, State)
 run = undefined -- TODO
