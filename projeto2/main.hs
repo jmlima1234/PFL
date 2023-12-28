@@ -23,19 +23,29 @@ createEmptyStack :: Stack
 createEmptyStack = [] -- TODO, Uncomment the function signature after defining Stack
 
 stack2Str :: Stack -> String
-stack2Str stack = intercalate "," (map instToStr (reverse stack))
+stack2Str stack = intercalate "," (map instToStr stack)
   where
     instToStr :: Inst -> String
-    instToStr (Push n) = show n
+    instToStr (Push n) = boolToStr n
     instToStr Tru = "True"
     instToStr Fals = "False"
     instToStr inst = show inst
+
+    boolToStr :: Integer -> String
+    boolToStr 0 = "False"
+    boolToStr 1 = "True"
+    boolToStr n = show n
 
 createEmptyState :: State
 createEmptyState = [] -- TODO, Uncomment the function signature after defining State
 
 state2Str :: State -> String
-state2Str state = intercalate "," (sortOn id (map (\(var, val) -> var ++ "=" ++ show val) state))
+state2Str state = intercalate "," (sortOn id (map (\(var, val) -> var ++ "=" ++ boolToStr val) state))
+  where
+    boolToStr :: Integer -> String
+    boolToStr 0 = "False"
+    boolToStr 1 = "True"
+    boolToStr n = show n
 
 run :: (Code, Stack, State) -> (Code, Stack, State)
 run ([], stack, state) = ([], stack, state)
@@ -45,7 +55,11 @@ run (Mult:code, (Push n1):(Push n2):stack, state) = run (code, (Push (n1 * n2)):
 run (Sub:code, (Push n1):(Push n2):stack, state) = run (code, (Push (n1 - n2)):stack, state)
 run (Tru:code, stack, state) = run (code, (Tru):stack, state)
 run (Fals:code, stack, state) = run (code, (Fals):stack, state)
-run (Equ:code, (Push n1):(Push n2):stack, state) = run (code, (if n1 == n2 then Tru else Fals):stack, state)
+run (Equ:code, (Tru):(Tru):stack, state) = run (code, (Tru):stack, state)
+run (Equ:code, (Fals):(Fals):stack, state) = run (code, (Tru):stack, state)
+run (Equ:code, (Tru):(Fals):stack, state) = run (code, (Fals):stack, state)
+run (Equ:code, (Fals):(Tru):stack, state) = run (code, (Fals):stack, state)
+run (Equ:code, stack, state) = error "Run-time error"
 run (Le:code, (Push n1):(Push n2):stack, state) = run (code, (if n1 <= n2 then Tru else Fals):stack, state)
 run (And:code, (Tru):(Tru):stack, state) = run (code, (Tru):stack, state)
 run (And:code, (Fals):(Tru):stack, state) = run (code, (Fals):stack, state)
@@ -56,20 +70,18 @@ run (Neg:code, (Tru):stack, state) = run (code, (Fals):stack, state)
 run (Neg:code, (Fals):stack, state) = run (code, (Tru):stack, state)
 run ((Fetch var):code, stack, state) = run (code, (Push (fetch var state)):stack, state)
 run ((Store var):code, (Push n):stack, state) = run (code, stack, (store var n state))
+run ((Store var):code, Tru:stack, state) = run (code, stack, (store var 1 state))
+run ((Store var):code, Fals:stack, state) = run (code, stack, (store var 0 state))
 run (Noop:code, stack, state) = run (code, stack, state)
 run ((Branch code1 code2):code, (Tru):stack, state) = run (code1 ++ code, stack, state)
 run ((Branch code1 code2):code, (Fals):stack, state) = run (code2 ++ code, stack, state)
 run ((Loop code1 code2):code, (Tru):stack, state) = run (code1 ++ [Loop code1 code2] ++ code, stack, state)
 run ((Loop code1 code2):code, (Fals):stack, state) = run (code, stack, state)
 
-testAssembler :: Code -> (String, String)
-testAssembler code = (stack2Str stack, state2Str state)
-  where (_,stack,state) = run(code, createEmptyStack, createEmptyState)
-
 fetch :: String -> State -> Integer
 fetch var state = 
   case lookup var state of
-    Nothing -> error ("Variable " ++ var ++ " not found")
+    Nothing -> error ("Run-time error")
     Just n  -> n
 
 store :: String -> Integer -> State -> State
@@ -90,7 +102,7 @@ data Aexp =
 data Bexp =
     Bexp :&: Bexp
   | Bexp :|: Bexp
-  | :¬: Bexp
+  | Not Bexp
   | Aexp :==: Aexp
   | Aexp :<=: Aexp
   | BTrue
@@ -99,40 +111,16 @@ data Bexp =
 
 data Stm =
     String :=: Aexp
-  | Stm :;: Stm
+  | Seq Stm Stm
   | While Bexp Stm
   deriving Show
 
 
 
-compA :: Aexp -> Code
-compA (Var x) = [Fetch x]
-compA (Num n) = [Push n]
-compA (a1 :+: a2) = compA a2 ++ compA a1 ++ [Add]
-compA (a1 :-: a2) = compA a2 ++ compA a1 ++ [Sub]
-compA (a1 :*: a2) = compA a2 ++ compA a1 ++ [Mult]
 
-compB :: Bexp -> Code
-compB (b1 :&: b2) = compB b2 ++ compB b1 ++ [And]
-compB (b1 :|: b2) = compB b2 ++ compB b1 ++ [Or]
-compB (:¬: b) = compB b ++ [Neg]
-compB (a1 :==: a2) = compA a2 ++ compA a1 ++ [Equ]
-compB (a1 :<=: a2) = compA a2 ++ compA a1 ++ [Le]
-compB BTrue = [Tru]
-compB BFalse = [Fal]
-
-compStm :: Stm -> Code
-compStm (x :=: a) = compA a ++ [Store x]
-compStm (s1 :;: s2) = compStm s1 ++ compStm s2
-compStm (While b s) = [Loop (compB b) (compStm s ++ [Branch [Noop] [Noop]])]
-
-compile :: [Stm] -> Code
-compile [] = []
-compile (stm:stmts) = compStm stm ++ compile stmts
 
 -- compile :: Program -> Code
 compile = undefined -- TODO
 
 -- parse :: String -> Program
 parse = undefined -- TODO
-
