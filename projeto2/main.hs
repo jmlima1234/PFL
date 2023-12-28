@@ -79,6 +79,31 @@ store var n state = (var, n) : filter ((/= var) . fst) state
 -- Part 2
 
 -- TODO: Define the types Aexp, Bexp, Stm and Program
+data Aexp = 
+    Var String
+  | Num Integer
+  | Aexp :+: Aexp
+  | Aexp :-: Aexp
+  | Aexp :*: Aexp
+  deriving Show
+
+data Bexp =
+    Bexp :&: Bexp
+  | Bexp :|: Bexp
+  | :¬: Bexp
+  | Aexp :==: Aexp
+  | Aexp :<=: Aexp
+  | BTrue
+  | BFalse
+  deriving Show
+
+data Stm =
+    String :=: Aexp
+  | Stm :;: Stm
+  | While Bexp Stm
+  deriving Show
+
+
 
 -- compA :: Aexp -> Code
 -- compA (Var x) = [Fetch x]
