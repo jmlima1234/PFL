@@ -62,6 +62,10 @@ run ((Branch code1 code2):code, (Fals):stack, state) = run (code2 ++ code, stack
 run ((Loop code1 code2):code, (Tru):stack, state) = run (code1 ++ [Loop code1 code2] ++ code, stack, state)
 run ((Loop code1 code2):code, (Fals):stack, state) = run (code, stack, state)
 
+testAssembler :: Code -> (String, String)
+testAssembler code = (stack2Str stack, state2Str state)
+  where (_,stack,state) = run(code, createEmptyStack, createEmptyState)
+
 fetch :: String -> State -> Integer
 fetch var state = 
   case lookup var state of
@@ -77,10 +81,17 @@ store var n state = (var, n) : filter ((/= var) . fst) state
 -- TODO: Define the types Aexp, Bexp, Stm and Program
 
 -- compA :: Aexp -> Code
-compA = undefined -- TODO
+-- compA (Var x) = [Fetch x]
+-- compA (Num n) = [Push n]
+-- compA (Add a1 a2) = compA a2 ++ compA a1 ++ [Add]
+-- compA (Sub a1 a2) = compA a2 ++ compA a1 ++ [Sub]
+-- compA (Mult a1 a2) = compA a2 ++ compA a1 ++ [Mult]
 
 -- compB :: Bexp -> Code
-compB = undefined -- TODO
+-- compB TrueB = [Tru]
+-- compB FalseB = [Fals]
+-- compB (Not b) = compB b ++ [Neg]
+-- compB (Equal a1 a2) = compA a2 ++ compA a1 ++ [Equ]
 
 -- compile :: Program -> Code
 compile = undefined -- TODO
