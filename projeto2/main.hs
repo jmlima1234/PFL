@@ -105,18 +105,30 @@ data Stm =
 
 
 
--- compA :: Aexp -> Code
--- compA (Var x) = [Fetch x]
--- compA (Num n) = [Push n]
--- compA (Add a1 a2) = compA a2 ++ compA a1 ++ [Add]
--- compA (Sub a1 a2) = compA a2 ++ compA a1 ++ [Sub]
--- compA (Mult a1 a2) = compA a2 ++ compA a1 ++ [Mult]
+compA :: Aexp -> Code
+compA (Var x) = [Fetch x]
+compA (Num n) = [Push n]
+compA (a1 :+: a2) = compA a2 ++ compA a1 ++ [Add]
+compA (a1 :-: a2) = compA a2 ++ compA a1 ++ [Sub]
+compA (a1 :*: a2) = compA a2 ++ compA a1 ++ [Mult]
 
--- compB :: Bexp -> Code
--- compB TrueB = [Tru]
--- compB FalseB = [Fals]
--- compB (Not b) = compB b ++ [Neg]
--- compB (Equal a1 a2) = compA a2 ++ compA a1 ++ [Equ]
+compB :: Bexp -> Code
+compB (b1 :&: b2) = compB b2 ++ compB b1 ++ [And]
+compB (b1 :|: b2) = compB b2 ++ compB b1 ++ [Or]
+compB (:¬: b) = compB b ++ [Neg]
+compB (a1 :==: a2) = compA a2 ++ compA a1 ++ [Equ]
+compB (a1 :<=: a2) = compA a2 ++ compA a1 ++ [Le]
+compB BTrue = [Tru]
+compB BFalse = [Fal]
+
+compStm :: Stm -> Code
+compStm (x :=: a) = compA a ++ [Store x]
+compStm (s1 :;: s2) = compStm s1 ++ compStm s2
+compStm (While b s) = [Loop (compB b) (compStm s ++ [Branch [Noop] [Noop]])]
+
+compile :: [Stm] -> Code
+compile [] = []
+compile (stm:stmts) = compStm stm ++ compile stmts
 
 -- compile :: Program -> Code
 compile = undefined -- TODO
