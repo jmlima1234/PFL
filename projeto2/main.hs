@@ -151,32 +151,30 @@ data Stm =
   | While Bexp Stm
   deriving Show
 
+compA :: Aexp -> Code
+compA (Var x) = [Fetch x]
+compA (Num n) = [Push n]
+compA (a1 :+: a2) = compA a2 ++ compA a1 ++ [Add]
+compA (a1 :-: a2) = compA a2 ++ compA a1 ++ [Sub]
+compA (a1 :*: a2) = compA a2 ++ compA a1 ++ [Mult]
 
+compB :: Bexp -> Code
+compB (b1 :&: b2) = compB b2 ++ compB b1 ++ [And]
+compB (b1 :|: b2) = compB b2 ++ compB b1 ++ [Or]
+compB (:¬: b) = compB b ++ [Neg]
+compB (a1 :==: a2) = compA a2 ++ compA a1 ++ [Equ]
+compB (a1 :<=: a2) = compA a2 ++ compA a1 ++ [Le]
+compB BTrue = [Tru]
+compB BFalse = [Fal]
 
-testAssembler :: Code -> (String, String)
-testAssembler code = (stack2Str stack, state2Str state)
-  where (_,stack,state) = run(code, createEmptyStack, createEmptyState)
+compStm :: Stm -> Code
+compStm (x :=: a) = compA a ++ [Store x]
+compStm (s1 :;: s2) = compStm s1 ++ compStm s2
+compStm (While b s) = [Loop (compB b) (compStm s ++ [Branch [Noop] [Noop]])]
 
--- Examples:
--- testAssembler [Push 10,Push 4,Push 3,Sub,Mult] == ("-10","")
--- testAssembler [Fals,Push 3,Tru,Store "var",Store "a", Store "someVar"] == ("","a=3,someVar=False,var=True")
--- testAssembler [Fals,Store "var",Fetch "var"] == ("False","var=False")
--- testAssembler [Push (-20),Tru,Fals] == ("False,True,-20","")
--- testAssembler [Push (-20),Tru,Tru,Neg] == ("False,True,-20","")
--- testAssembler [Push (-20),Tru,Tru,Neg,Equ] == ("False,-20","")
--- testAssembler [Push (-20),Push (-21), Le] == ("True","")
--- testAssembler [Push 5,Store "x",Push 1,Fetch "x",Sub,Store "x"] == ("","x=4")
--- testAssembler [Push 10,Store "i",Push 1,Store "fact",Loop [Push 1,Fetch "i",Equ,Neg] [Fetch "i",Fetch "fact",Mult,Store "fact",Push 1,Fetch "i",Sub,Store "i"]] == ("","fact=3628800,i=1")
--- If you test:
--- testAssembler [Push 1,Push 2,And]
--- You should get an exception with the string: "Run-time error"
--- If you test:
--- testAssembler [Tru,Tru,Store "y", Fetch "x",Tru]
--- You should get an exception with the string: "Run-time error"
-
-
--- compile :: Program -> Code
-compile = undefined -- TODO
+compile :: [Stm] -> Code
+compile [] = []
+compile (stm:stmts) = compStm stm ++ compile stmts
 
 -- parse :: String -> Program
 parse = undefined -- TODO
