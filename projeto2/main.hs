@@ -160,16 +160,16 @@ compA (a1 :*: a2) = compA a2 ++ compA a1 ++ [Mult]
 
 compB :: Bexp -> Code
 compB (b1 :&: b2) = compB b2 ++ compB b1 ++ [And]
-compB (b1 :|: b2) = compB b2 ++ compB b1 ++ [Or]
-compB (:¬: b) = compB b ++ [Neg]
+compB (b1 :|: b2) = compB b1 ++ [Neg] ++ compB b2 ++ [Neg, And, Neg]
+compB (Not b) = compB b ++ [Neg]
 compB (a1 :==: a2) = compA a2 ++ compA a1 ++ [Equ]
 compB (a1 :<=: a2) = compA a2 ++ compA a1 ++ [Le]
 compB BTrue = [Tru]
-compB BFalse = [Fal]
+compB BFalse = [Fals]
 
 compStm :: Stm -> Code
 compStm (x :=: a) = compA a ++ [Store x]
-compStm (s1 :;: s2) = compStm s1 ++ compStm s2
+compStm (Seq s1 s2) = compStm s1 ++ compStm s2
 compStm (While b s) = [Loop (compB b) (compStm s ++ [Branch [Noop] [Noop]])]
 
 compile :: [Stm] -> Code
