@@ -152,6 +152,32 @@ data Stm =
   deriving Show
 
 
+compA :: Aexp -> Code
+compA (Var x) = [Fetch x]
+compA (Num n) = [Push n]
+compA (a1 :+: a2) = compA a2 ++ compA a1 ++ [Add]
+compA (a1 :-: a2) = compA a2 ++ compA a1 ++ [Sub]
+compA (a1 :*: a2) = compA a2 ++ compA a1 ++ [Mult]
+
+compB :: Bexp -> Code
+compB (b1 :&: b2) = compB b2 ++ compB b1 ++ [And]
+compB (b1 :|: b2) = compB b1 ++ [Neg] ++ compB b2 ++ [Neg, And, Neg]
+compB (Not b) = compB b ++ [Neg]
+compB (a1 :==: a2) = compA a2 ++ compA a1 ++ [Equ]
+compB (a1 :<=: a2) = compA a2 ++ compA a1 ++ [Le]
+compB BTrue = [Tru]
+compB BFalse = [Fals]
+
+compStm :: Stm -> Code
+compStm (x :=: a) = compA a ++ [Store x]
+compStm (Seq s1 s2) = compStm s1 ++ compStm s2
+compStm (While b s) = [Loop (compB b) (compStm s ++ [Branch [Noop] [Noop]])]
+
+compile :: [Stm] -> Code
+compile [] = []
+compile (stm:stmts) = compStm stm ++ compile stmts
+
+
 
 testAssembler :: Code -> (String, String)
 testAssembler code = (stack2Str stack, state2Str state)
@@ -173,10 +199,6 @@ testAssembler code = (stack2Str stack, state2Str state)
 -- If you test:
 -- testAssembler [Tru,Tru,Store "y", Fetch "x",Tru]
 -- You should get an exception with the string: "Run-time error"
-
-
--- compile :: Program -> Code
-compile = undefined -- TODO
 
 -- parse :: String -> Program
 parse = undefined -- TODO
