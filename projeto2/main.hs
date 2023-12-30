@@ -5,6 +5,8 @@
 
 import Data.List (sortOn, intercalate)
 import qualified Data.List as List
+import Data.List
+
 import Data.List (sort)
 import Data.Function (on)
 import Data.List (find)
@@ -119,8 +121,6 @@ run ((Branch code1 code2):code, stack, state) = error "Run-time error"
 -- Loop
 run ((Loop code1 code2):code, stack, state) = run (code1 ++ [Branch (code2 ++ [Loop code1 code2]) [Noop]] ++ code, stack, state)
 
-
-
 removeOldAssignments :: String -> State -> State
 removeOldAssignments var state = filter ((/= var) . fst) state
 
@@ -176,5 +176,15 @@ compile :: [Stm] -> Code
 compile [] = []
 compile (stm:stmts) = compStm stm ++ compile stmts
 
--- parse :: String -> Program
-parse = undefined -- TODO
+
+lexer :: String -> [String]
+lexer [] = []
+lexer str
+    | isPrefixOf " " str = lexer (dropWhile (== ' ') str)
+    | otherwise = case find (`isPrefixOf` str) delimiters of
+        Just delimiter -> delimiter : lexer (drop (length delimiter) str)
+        Nothing -> let (token, rest) = break (`elem` operatorChars) str
+                   in if not (null token) then token : lexer rest else lexer rest
+  where
+    delimiters = ["+","-","*","<=","==",":=", "=","<","(",")","{","}",";","not","and","or","if","then","else","while","do","True","False", "i", "10", "fact", "1", "do"]
+    operatorChars = ' ' : nub (concat delimiters)
