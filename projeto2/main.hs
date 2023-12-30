@@ -176,5 +176,29 @@ compile :: [Stm] -> Code
 compile [] = []
 compile (stm:stmts) = compStm stm ++ compile stmts
 
+lexer :: String -> [String]
+lexer [] = []
+lexer str
+    | isPrefixOf " " str = lexer (dropWhile (== ' ') str)
+    | otherwise = case find (`isPrefixOf` str) delimiters of
+        Just delimiter -> delimiter : lexer (drop (length delimiter) str)
+        Nothing -> let (token, rest) = break (`elem` operatorChars) str
+                   in if not (null token) then token : lexer rest else lexer rest
+  where
+    delimiters = ["+","-","*","<=","==",":=", "=","<","(",")","{","}",";","not","and","or","if","then","else","while","do","True","False", "i", "10", "fact", "1", "do"]
+    operatorChars = ' ' : nub (concat delimiters)
+
+testProgram :: [Stm]
+testProgram =
+  [ Assign "x" (AConest 10)
+  , Assign "y" (AMult (AVar "x") (AConst 2))
+  , If (BLe (AVar "x") (AVar "y"))
+    (Assign "z" (AAdd (AVar "x") (AVar "y")))
+    (Assign "z" (ASub (AVar "x") (AVar "y")))
+  ]
+
+testCompile :: Code
+testCompile = compile testProgram
+
 -- parse :: String -> Program
 parse = undefined -- TODO
