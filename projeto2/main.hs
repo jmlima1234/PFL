@@ -5,9 +5,18 @@
 
 import Data.List (sortOn, intercalate)
 import qualified Data.List as List
+import Data.List
+
 import Data.List (sort)
 import Data.Function (on)
 import Data.List (find)
+import qualified Text.Parsec as Parsec
+import Text.Parsec.String (Parser)
+import Text.Parsec.Expr
+import Text.Parsec.Token as Token
+import Text.Parsec.Language (emptyDef)
+import Control.Applicative ((<*), (*>), (<|>))
+import Data.Functor.Identity (Identity)
 
 
 -- Do not modify our definition of Inst and Code
@@ -119,8 +128,6 @@ run ((Branch code1 code2):code, stack, state) = error "Run-time error"
 -- Loop
 run ((Loop code1 code2):code, stack, state) = run (code1 ++ [Branch (code2 ++ [Loop code1 code2]) [Noop]] ++ code, stack, state)
 
-
-
 removeOldAssignments :: String -> State -> State
 removeOldAssignments var state = filter ((/= var) . fst) state
 
@@ -136,20 +143,28 @@ data Aexp =
   deriving Show
 
 data Bexp =
-    Bexp :&: Bexp
+    BVar String 
+  | BConst Integer 
+  | BoolConst Bool
+  | Bexp :&: Bexp
   | Bexp :|: Bexp
   | Not Bexp
-  | Aexp :==: Aexp
-  | Aexp :<=: Aexp
+  | Bexp :==: Bexp
+  | Bexp :<=: Bexp
   | BTrue
   | BFalse
+  | EqAexp Aexp Aexp
   deriving Show
 
 data Stm =
     String :=: Aexp
-  | Seq Stm Stm
-  | While Bexp Stm
+  | Seq [Stm] 
+  | If [Bexp] [Stm] [Stm] 
+  | While [Bexp] [Stm]
   deriving Show
+
+data Token = PlusTok | MinusTok | TimesTok | DivTok | OpenTok | CloseTok | IntTok Integer | VarTok String | AssignTok | WhileTok | DoTok |
+            TrueTok | FalseTok | AndTok | OrTok | NotTok | EqTok | LtTok | IfTok | ThenTok | IntEqTok | BoolEqTok|  ElseTok | SemicolonTok deriving (Show)
 
 compA :: Aexp -> Code
 compA (Var x) = [Fetch x]
@@ -158,47 +173,52 @@ compA (a1 :+: a2) = compA a2 ++ compA a1 ++ [Add]
 compA (a1 :-: a2) = compA a2 ++ compA a1 ++ [Sub]
 compA (a1 :*: a2) = compA a2 ++ compA a1 ++ [Mult]
 
-compB :: Bexp -> Code
-compB (b1 :&: b2) = compB b2 ++ compB b1 ++ [And]
-compB (b1 :|: b2) = compB b1 ++ [Neg] ++ compB b2 ++ [Neg, And, Neg]
-compB (Not b) = compB b ++ [Neg]
-compB (a1 :==: a2) = compA a2 ++ compA a1 ++ [Equ]
-compB (a1 :<=: a2) = compA a2 ++ compA a1 ++ [Le]
-compB BTrue = [Tru]
-compB BFalse = [Fals]
+-- compB 
+compB :: [Bexp] -> Code
+compB [] = []
+compB (x:xs) = 
+    case x of
+        BoolConst b -> (if b then [Tru] else [Fals]) ++ compB xs
+        BConst n -> [Push n] ++ compB xs
+        BVar n -> [Fetch n] ++ compB xs
+        BTrue -> [Tru] ++ compB xs
+        BFalse -> [Fals] ++ compB xs
+        x1 :&: x2 -> compB [x1] ++ compB [x2] ++ [And] ++ compB xs
+        x1 :|: x2 -> compB [x1] ++ compB [x2] ++ [Branch [Tru] [Fals]] ++ compB xs
+        Not x -> compB [x] ++ [Neg] ++ compB xs
+        x1 :==: x2 -> compB [x1] ++ compB [x2] ++ [Equ] ++ compB xs
+        x1 :<=: x2 -> compB [x1] ++ compB [x2] ++ [Le] ++ compB xs
+        EqAexp x1 x2 -> compA x1 ++ compA x2 ++ [Equ] ++ compB xs
 
-compStm :: Stm -> Code
-compStm (x :=: a) = compA a ++ [Store x]
-compStm (Seq s1 s2) = compStm s1 ++ compStm s2
-compStm (While b s) = [Loop (compB b) (compStm s ++ [Branch [Noop] [Noop]])]
-
+-- compile 
 compile :: [Stm] -> Code
 compile [] = []
-compile (stm:stmts) = compStm stm ++ compile stmts
+compile ((x :=: a):xs) = compA a ++ [Store x] ++ compile xs
+compile ((Seq stms):xs) = compile stms ++ compile xs
+compile ((If x stm1 stm2):xs) = compB x ++ [Branch (compile stm1) (compile stm2)] ++ compile xs
+compile ((While x stm):xs) = [Loop (compB x) (compile stm)] ++ compile xs
 
-lexer :: String -> [String]
-lexer [] = []
-lexer str
-    | isPrefixOf " " str = lexer (dropWhile (== ' ') str)
-    | otherwise = case find (`isPrefixOf` str) delimiters of
-        Just delimiter -> delimiter : lexer (drop (length delimiter) str)
-        Nothing -> let (token, rest) = break (`elem` operatorChars) str
-                   in if not (null token) then token : lexer rest else lexer rest
-  where
-    delimiters = ["+","-","*","<=","==",":=", "=","<","(",")","{","}",";","not","and","or","if","then","else","while","do","True","False", "i", "10", "fact", "1", "do"]
-    operatorChars = ' ' : nub (concat delimiters)
+lexer :: Token.TokenParser ()
+lexer = Token.makeTokenParser emptyDef
 
-testProgram :: [Stm]
-testProgram =
-  [ Assign "x" (AConest 10)
-  , Assign "y" (AMult (AVar "x") (AConst 2))
-  , If (BLe (AVar "x") (AVar "y"))
-    (Assign "z" (AAdd (AVar "x") (AVar "y")))
-    (Assign "z" (ASub (AVar "x") (AVar "y")))
-  ]
+myIdentifier :: Parser String
+myIdentifier = Token.identifier lexer
 
-testCompile :: Code
-testCompile = compile testProgram
+myInteger :: Parser Integer
+myInteger = Token.integer lexer
 
--- parse :: String -> Program
-parse = undefined -- TODO
+aexp :: Parser Aexp
+aexp = buildExpressionParser aexpOperators aexpTerm
+
+aexpTerm :: Parser Aexp
+aexpTerm = parens lexer aexp
+       <|> Var <$> myIdentifier
+       <|> Num <$> myInteger
+
+aexpOperators :: OperatorTable String () Identity Aexp
+aexpOperators = [ [Infix (reservedOp lexer "*" >> return (:*:)) AssocLeft]
+                , [Infix (reservedOp lexer "-" >> return (:-:)) AssocLeft]
+                , [Infix (reservedOp lexer "+" >> return (:+:)) AssocLeft]
+                ]
+
+    
