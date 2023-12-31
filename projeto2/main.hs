@@ -211,3 +211,25 @@ parseAexpOrParent (OpenTok : restofTokens) =
       Just _ -> Nothing
       Nothing -> Nothing
 parseAexpOrParent tokens = parseAexp tokens
+
+parseMultOrAexpOrParent :: [Token] -> Maybe (Aexp, [Token])
+parseMultOrAexpOrParent tokens =
+    case parseAexpOrParent tokens of 
+        Just (expr, (TimesTok : restofTokens)) ->
+            case parseMultOrAexpOrParent restofTokens of
+                Just (expr2, restofTokens2) -> Just (expr :*: expr2, restofTokens2)
+                Nothing -> Nothing
+        result -> result
+
+parseAddOrSubMultOrAexpOrParent :: [Token] -> Maybe (Aexp, [Token])
+parseAddOrSubMultOrAexpOrParent tokens = 
+    case parseMultOrAexpOrParent tokens of
+      Just (expr, (PlusTok : restofTokens)) ->
+        case parseAddOrSubMultOrAexpOrParent restofTokens of
+          Just (expr2, restofTokens2) -> Just (expr :+: expr2, restofTokens2)
+          Nothing -> Nothing
+      Just (expr, (MinusTok : restofTokens)) ->
+        case parseAddOrSubMultOrAexpOrParent restofTokens of
+          Just (expr2,restofTokens2) -> Just (expr :-: expr2, restofTokens2)
+          Nothing -> Nothing
+      result -> result
