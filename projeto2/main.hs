@@ -16,7 +16,15 @@ import Text.Parsec.Expr
 import Text.Parsec.Token as Token
 import Text.Parsec.Language (emptyDef)
 import Control.Applicative ((<*), (*>), (<|>))
+import Control.Applicative (many)
 import Data.Functor.Identity (Identity)
+import Text.Parsec.String (Parser)
+import Text.Parsec (parse, ParseError)
+import Text.Parsec.String (parseFromFile)
+import Text.Parsec (parse, ParseError, endBy)
+
+
+
 
 
 -- Do not modify our definition of Inst and Code
@@ -221,4 +229,20 @@ aexpOperators = [ [Infix (reservedOp lexer "*" >> return (:*:)) AssocLeft]
                 , [Infix (reservedOp lexer "+" >> return (:+:)) AssocLeft]
                 ]
 
-    
+bexp :: Parser Bexp
+bexp = buildExpressionParser bexpOperators bexpTerm
+
+bexpTerm :: Parser Bexp
+bexpTerm = parens lexer bexp
+       <|> BVar <$> myIdentifier
+       <|> BConst <$> myInteger
+       <|> BoolConst <$> (True <$ reserved lexer "true" <|> False <$ reserved lexer "false")
+       <|> Not <$ reservedOp lexer "¬" <*> bexpTerm
+
+bexpOperators :: OperatorTable String () Identity Bexp
+bexpOperators = [ [Prefix (reservedOp lexer "not" >> return Not)]
+                , [Infix (reservedOp lexer "and" >> return (:&:)) AssocLeft]
+                , [Infix (reservedOp lexer "==" >> return (:==:)) AssocLeft]
+                , [Infix (reservedOp lexer "<=" >> return (:<=:)) AssocLeft]
+                ]
+
