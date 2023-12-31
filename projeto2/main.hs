@@ -233,3 +233,16 @@ parseAddOrSubMultOrAexpOrParent tokens =
           Just (expr2,restofTokens2) -> Just (expr :-: expr2, restofTokens2)
           Nothing -> Nothing
       result -> result
+
+
+-- parse :: String -> Program
+-- parse str = parseProgram (lexer str)
+
+-- parseProgram :: [Token] -> Program
+-- parseProgram tokens = 
+--  case tokens of
+--    [] -> []
+--    _ ->
+--      case parseStm tokens of
+--        Just (stm, restTokens) -> stm : parseProgram restTokens
+--        _ -> []
