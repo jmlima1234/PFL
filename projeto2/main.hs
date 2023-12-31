@@ -3,13 +3,8 @@
 
 -- Part 1
 
-import Data.List (sortOn, intercalate)
-import qualified Data.List as List
 import Data.List
-
-import Data.List (sort)
 import Data.Function (on)
-import Data.List (find)
 import qualified Text.Parsec as Parsec
 import Text.Parsec.String (Parser)
 import Text.Parsec.Expr
@@ -201,24 +196,18 @@ compile ((While x stm):xs) = [Loop (compB x) (compile stm)] ++ compile xs
 lexer :: Token.TokenParser ()
 lexer = Token.makeTokenParser emptyDef
 
-myIdentifier :: Parser String
-myIdentifier = Token.identifier lexer
-
-myInteger :: Parser Integer
-myInteger = Token.integer lexer
-
-aexp :: Parser Aexp
-aexp = buildExpressionParser aexpOperators aexpTerm
-
-aexpTerm :: Parser Aexp
-aexpTerm = parens lexer aexp
-       <|> Var <$> myIdentifier
-       <|> Num <$> myInteger
-
-aexpOperators :: OperatorTable String () Identity Aexp
-aexpOperators = [ [Infix (reservedOp lexer "*" >> return (:*:)) AssocLeft]
-                , [Infix (reservedOp lexer "-" >> return (:-:)) AssocLeft]
-                , [Infix (reservedOp lexer "+" >> return (:+:)) AssocLeft]
-                ]
-
+parseAexp :: [Token] -> Maybe (Aexp, [Token])
+parseAexp tokens =
+    case tokens of
+        (IntTok n : restTokens) -> Just (Num n, restTokens)
+        (VarTok v : restTokens) -> Just (Var v, restTokens)
+        _ -> Nothing
     
+parseAexpOrParent :: [Token] -> Maybe (Aexp, [Token])
+parseAexpOrParent (OpenTok : restofTokens) =
+    case parseAddOrSubMultOrAexpOrParent restofTokens of
+      Just (expr, (CloseTok : restofTokens2)) ->
+          Just (expr,restofTokens2)
+      Just _ -> Nothing
+      Nothing -> Nothing
+parseAexpOrParent tokens = parseAexp tokens
