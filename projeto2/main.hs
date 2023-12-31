@@ -10,6 +10,13 @@ import Data.List
 import Data.List (sort)
 import Data.Function (on)
 import Data.List (find)
+import qualified Text.Parsec as Parsec
+import Text.Parsec.String (Parser)
+import Text.Parsec.Expr
+import Text.Parsec.Token as Token
+import Text.Parsec.Language (emptyDef)
+import Control.Applicative ((<*), (*>), (<|>))
+import Data.Functor.Identity (Identity)
 
 
 -- Do not modify our definition of Inst and Code
@@ -176,15 +183,27 @@ compile :: [Stm] -> Code
 compile [] = []
 compile (stm:stmts) = compStm stm ++ compile stmts
 
+lexer :: Token.TokenParser ()
+lexer = Token.makeTokenParser emptyDef
 
-lexer :: String -> [String]
-lexer [] = []
-lexer str
-    | isPrefixOf " " str = lexer (dropWhile (== ' ') str)
-    | otherwise = case find (`isPrefixOf` str) delimiters of
-        Just delimiter -> delimiter : lexer (drop (length delimiter) str)
-        Nothing -> let (token, rest) = break (`elem` operatorChars) str
-                   in if not (null token) then token : lexer rest else lexer rest
-  where
-    delimiters = ["+","-","*","<=","==",":=", "=","<","(",")","{","}",";","not","and","or","if","then","else","while","do","True","False", "i", "10", "fact", "1", "do"]
-    operatorChars = ' ' : nub (concat delimiters)
+myIdentifier :: Parser String
+myIdentifier = Token.identifier lexer
+
+myInteger :: Parser Integer
+myInteger = Token.integer lexer
+
+aexp :: Parser Aexp
+aexp = buildExpressionParser aexpOperators aexpTerm
+
+aexpTerm :: Parser Aexp
+aexpTerm = parens lexer aexp
+       <|> Var <$> myIdentifier
+       <|> Num <$> myInteger
+
+aexpOperators :: OperatorTable String () Identity Aexp
+aexpOperators = [ [Infix (reservedOp lexer "*" >> return (:*:)) AssocLeft]
+                , [Infix (reservedOp lexer "-" >> return (:-:)) AssocLeft]
+                , [Infix (reservedOp lexer "+" >> return (:+:)) AssocLeft]
+                ]
+
+    
