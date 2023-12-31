@@ -156,6 +156,7 @@ data Stm =
   | Seq [Stm] 
   | If [Bexp] [Stm] [Stm] 
   | While [Bexp] [Stm]
+  | Skip
   deriving Show
 
 data Token = PlusTok | MinusTok | TimesTok | DivTok | OpenTok | CloseTok | IntTok Integer | VarTok String | AssignTok | WhileTok | DoTok |
@@ -234,6 +235,18 @@ parseAddOrSubMultOrAexpOrParent tokens =
           Nothing -> Nothing
       result -> result
 
+parseStm :: [Token] -> Maybe (Stm, [Token])
+parseStm tokens = 
+  case tokens of
+    (IfTok : restofTokens) ->
+    (WhileTok : restofTokens) ->
+    (VarTok v : AssignTok : restofTokens) ->
+    (OpenTok : VarTok v : AssignTok : restofTokens) ->
+    (SemicolonTok : restofTokens) ->
+        Just (Skip, restTokens)
+    (CloseTok : restofTokens) ->
+        Just (Skip, restTokens)
+    _ -> Nothing
 
 -- parse :: String -> Program
 -- parse str = parseProgram (lexer str)
