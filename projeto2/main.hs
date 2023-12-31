@@ -246,3 +246,40 @@ bexpOperators = [ [Prefix (reservedOp lexer "not" >> return Not)]
                 , [Infix (reservedOp lexer "<=" >> return (:<=:)) AssocLeft]
                 ]
 
+stm :: Parser Stm
+stm = Parsec.try assignStm
+  <|> Parsec.try ifStm
+  <|> Parsec.try whileStm
+  <|> seqStm
+  where
+    assignStm = do
+      var <- myIdentifier
+      reservedOp lexer ":="
+      expr <- aexp
+      reserved lexer ";"
+      return (var :=: expr)
+
+    ifStm = do
+      reserved lexer "if"
+      cond <- bexp
+      reserved lexer "then"
+      stm1 <- stms
+      reserved lexer "else"
+      stm2 <- stms
+      return (If [cond] stm1 stm2)
+
+    seqStm = do
+      reserved lexer "("
+      stms <- many stm
+      reserved lexer ")"
+      return (Seq stms)
+    
+    whileStm = do
+    reserved lexer "while"
+    cond <- parens lexer bexp
+    reserved lexer "do"
+    body <- parens lexer stms
+    return (While [cond] body)
+
+stms :: Parser [Stm]
+stms = many stm
