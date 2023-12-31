@@ -241,7 +241,13 @@ parseStm tokens =
     (IfTok : restofTokens) ->
     (WhileTok : restofTokens) ->
     (VarTok v : AssignTok : restofTokens) ->
+      case  parseAddOrSubMultOrAexpOrParent restTokens of
+      Just (expr, restTokens2) -> Just (v :=: expr, restTokens2)
+      Nothing -> Nothing
     (OpenTok : VarTok v : AssignTok : restofTokens) ->
+      case parseAddOrSubMultOrAexpOrParent restofTokens of
+      Just (expr, restofTokens2) -> Just (v :=: expr, restofTokens2)
+      Nothing -> Nothing
     (SemicolonTok : restofTokens) ->
         Just (Skip, restTokens)
     (CloseTok : restofTokens) ->
