@@ -308,6 +308,39 @@ parseBexpFactor (FalseTok : restTokens) = Just (BoolConst False, restTokens)
 parseBexpFactor (VarTok v : restTokens) = Just (BVar v, restTokens)
 parseBexpFactor _ = Nothing
 
+parseElse :: [Token] -> Maybe ([Stm], [Token])
+parseElse tokens = 
+    case tokens of
+        (OpenTok : restTokens) -> loopOpen restTokens []
+        _ -> loopSemicolon tokens []
+  where
+    loopOpen [] acc = Nothing
+    loopOpen (SemicolonTok : CloseTok : SemicolonTok : restTokens) acc = Just (reverse acc, restTokens)
+    loopOpen tokens acc =
+      case parseStm tokens of
+        Just (stm,  restTokens) -> loopOpen restTokens (stm : acc)
+        _ -> Nothing
+
+    loopSemicolon [] acc = Nothing
+    loopSemicolon (SemicolonTok : restTokens) acc = Just (reverse acc, restTokens)
+    loopSemicolon tokens acc =
+      case parseStm tokens of
+        Just (stm,  restTokens) -> loopSemicolon restTokens (stm : acc)
+        _ -> Nothing
+
+parseSeqUntilDo :: [Token] -> Maybe ([Bexp], [Token])
+parseSeqUntilDo tokens = loop tokens []
+  where
+    loop [] acc = Nothing
+    loop (DoTok : rest) acc = Just (reverse acc, DoTok : rest)
+    loop tokens acc =
+      case parseBexpFactor tokens of
+        Just (stm, restTokens) ->
+          case restTokens of
+            (SemicolonTok : restTokens') -> loop restTokens' (stm : acc)
+            _ -> Just (reverse (stm : acc), restTokens)
+        Nothing -> Nothing
+
 parseStm :: [Token] -> Maybe (Stm, [Token])
 parseStm tokens = 
   case tokens of
@@ -320,13 +353,16 @@ parseStm tokens =
         Just (bexp, ThenTok : restTokens2) ->
           case parseStmSeq restTokens2 of
             Just (stm1, ElseTok : restTokens3) ->
-              case parseStmSeq restTokens3 of
+              case parseElse restTokens3 of
                 Just (stm2, restTokens4) -> Just (If [bexp] stm1 stm2, restTokens4)
-                Nothing -> Nothing
+                Nothing -> 
+                  case parseStm restTokens3 of 
+                    Just (stmElse, restTokens4) -> Just (If [bexp] stm1 [stmElse], restTokens4)
+                    Nothing -> Nothing
             Nothing -> Nothing
         Nothing -> Nothing
     (WhileTok : restofTokens) ->
-      case parseBexp restofTokens of
+      case parseSeqUntilDo restofTokens of
         Just (bexp, DoTok : restTokens2) ->
           case parseStmSeq restTokens2 of
             Just (stm, restTokens3) -> Just (While [bexp] stm, restTokens3)
@@ -350,6 +386,6 @@ parseStmSeq tokens = Just ([], tokens)
 
 main :: IO ()
 main = do
-    let tokens = lexer "x <= 3 or y > 2;"
-    print $ parseBexp tokens
+    let tokens = lexer "if (not True and 2 <= 5 = 3 == 4) then x :=1; else y := 2;"
+    print $ parseStm tokens
 
