@@ -37,3 +37,19 @@ testParser programCode = (stack2Str stack, store2Str store)
 -- testParser "x := 42; if x <= 43 then x := 1; else x := 33; x := x+1; z := x+x;" == ("","x=2,z=4")
 -- testParser "x := 2; y := (x - 3)*(4 + 2*3); z := x +x*(2);" == ("","x=2,y=-10,z=6")
 -- testParser "i := 10; fact := 1; while (not(i == 1)) do (fact := fact * i; i := i - 1;);" == ("","fact=3628800,i=1")
+
+
+
+
+
+-- parse :: String -> Program
+-- parse str = parseProgram (lexer str)
+
+-- parseProgram :: [Token] -> Program
+-- parseProgram tokens = 
+--  case tokens of
+--    [] -> []
+--    _ ->
+--      case parseStm tokens of
+--        Just (stm, restTokens) -> stm : parseProgram restTokens
+--        _ -> []
