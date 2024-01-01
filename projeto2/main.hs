@@ -11,6 +11,7 @@ import Text.Parsec.Expr
 import Text.Parsec.Token as Token
 import Text.Parsec.Language (emptyDef)
 import Control.Applicative ((<*), (*>), (<|>))
+import Control.Applicative (many)
 import Data.Functor.Identity (Identity)
 import Data.Char (isDigit)
 
@@ -159,7 +160,7 @@ data Stm =
   deriving Show
 
 data Token = PlusTok | MinusTok | TimesTok | DivTok | OpenTok | CloseTok | IntTok Integer | VarTok String | AssignTok | WhileTok | DoTok |
-            TrueTok | FalseTok | AndTok | OrTok | NotTok | EqTok | LtTok | IfTok | ThenTok | IntEqTok | BoolEqTok|  ElseTok | SemicolonTok deriving (Show)
+            TrueTok | FalseTok | AndTok | OrTok | NotTok | EqTok | LeTok | IfTok | ThenTok | IntEqTok | BoolEqTok|  ElseTok | SemicolonTok deriving (Show)
 
 compA :: Aexp -> Code
 compA (Var x) = [Fetch x]
@@ -220,7 +221,7 @@ stringToToken "and" = AndTok
 stringToToken "or" = OrTok
 stringToToken "not" = NotTok
 stringToToken "==" = EqTok
-stringToToken "<=" = LtTok
+stringToToken "<=" = LeTok
 stringToToken "if" = IfTok
 stringToToken "then" = ThenTok
 stringToToken "else" = ElseTok
@@ -297,14 +298,25 @@ parseNot (NotTok : restTokens) = do
   Just (Not bexp, restTokens2)
 parseNot tokens = parseBexpFactor tokens
 
+parseRel :: [Token] -> Maybe (Bexp, [Token])
+parseRel tokens = do
+  (aexp1, restTokens1) <- parseAexp tokens
+  case restTokens1 of
+    (LeTok : restTokens2) -> do
+      (aexp2, restTokens3) <- parseAexp restTokens2
+      Just (aexp1 :<=: aexp2, restTokens3)
+    (EqTok : restTokens2) -> do
+      (aexp2, restTokens3) <- parseAexp restTokens2
+      Just (aexp1 :==: aexp2, restTokens3)
+    _ -> Nothing
+
 parseBexpFactor :: [Token] -> Maybe (Bexp, [Token])
 parseBexpFactor (OpenTok : restTokens) = do
   (bexp, CloseTok : restTokens2) <- parseBexp restTokens
   Just (bexp, restTokens2)
-parseBexpFactor (VarTok v : EqTok : IntTok i : restTokens) = Just (Var v :==: Num i, restTokens)
-parseBexpFactor (VarTok v : LtTok : IntTok i : restTokens) = Just (Var v :<=: Num i, restTokens)
 parseBexpFactor (TrueTok : restTokens) = Just (BoolConst True, restTokens)
 parseBexpFactor (FalseTok : restTokens) = Just (BoolConst False, restTokens)
+parseBexpFactor (IntTok i : restTokens) = parseRel (IntTok i : restTokens)
 parseBexpFactor (VarTok v : restTokens) = Just (BVar v, restTokens)
 parseBexpFactor _ = Nothing
 
@@ -386,6 +398,6 @@ parseStmSeq tokens = Just ([], tokens)
 
 main :: IO ()
 main = do
-    let tokens = lexer "if (not True and 2 <= 5 = 3 == 4) then x :=1; else y := 2;"
-    print $ parseStm tokens
-
+    let tokens = lexer "2 <= 5 and 3 == 4 or 2 <= 5 and 3 == 4"
+    print tokens
+    print $ parseBexp tokens
