@@ -183,7 +183,7 @@ compB (x:xs) =
         x1 :|: x2 -> compB [x1] ++ compB [x2] ++ [Branch [Tru] [Fals]] ++ compB xs
         Not x -> compB [x] ++ [Neg] ++ compB xs
         a1 :==: a2 -> compA a1 ++ compA a2 ++ [Equ] ++ compB xs
-        a1 :<=: a2 -> compA a1 ++ compA a2 ++ [Le] ++ compB xs
+        a1 :<=: a2 -> compA a2 ++ compA a1 ++ [Le] ++ compB xs
 
 -- compile 
 compile :: [Stm] -> Code
