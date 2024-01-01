@@ -13,14 +13,7 @@ import Text.Parsec.Language (emptyDef)
 import Control.Applicative ((<*), (*>), (<|>))
 import Control.Applicative (many)
 import Data.Functor.Identity (Identity)
-import Text.Parsec.String (Parser)
-import Text.Parsec (parse, ParseError)
-import Text.Parsec.String (parseFromFile)
-import Text.Parsec (parse, ParseError, endBy)
-
-
-
-
+import Data.Char (isDigit)
 
 -- Do not modify our definition of Inst and Code
 data Inst =
@@ -152,11 +145,10 @@ data Bexp =
   | Bexp :&: Bexp
   | Bexp :|: Bexp
   | Not Bexp
-  | Bexp :==: Bexp
-  | Bexp :<=: Bexp
+  | Aexp :==: Aexp
+  | Aexp :<=: Aexp
   | BTrue
   | BFalse
-  | EqAexp Aexp Aexp
   deriving Show
 
 data Stm =
@@ -164,10 +156,11 @@ data Stm =
   | Seq [Stm] 
   | If [Bexp] [Stm] [Stm] 
   | While [Bexp] [Stm]
+  | Skip
   deriving Show
 
 data Token = PlusTok | MinusTok | TimesTok | DivTok | OpenTok | CloseTok | IntTok Integer | VarTok String | AssignTok | WhileTok | DoTok |
-            TrueTok | FalseTok | AndTok | OrTok | NotTok | EqTok | LtTok | IfTok | ThenTok | IntEqTok | BoolEqTok|  ElseTok | SemicolonTok deriving (Show)
+            TrueTok | FalseTok | AndTok | OrTok | NotTok | EqTok | LeTok | IfTok | ThenTok | IntEqTok | BoolEqTok|  ElseTok | SemicolonTok deriving (Show)
 
 compA :: Aexp -> Code
 compA (Var x) = [Fetch x]
@@ -189,9 +182,8 @@ compB (x:xs) =
         x1 :&: x2 -> compB [x1] ++ compB [x2] ++ [And] ++ compB xs
         x1 :|: x2 -> compB [x1] ++ compB [x2] ++ [Branch [Tru] [Fals]] ++ compB xs
         Not x -> compB [x] ++ [Neg] ++ compB xs
-        x1 :==: x2 -> compB [x1] ++ compB [x2] ++ [Equ] ++ compB xs
-        x1 :<=: x2 -> compB [x1] ++ compB [x2] ++ [Le] ++ compB xs
-        EqAexp x1 x2 -> compA x1 ++ compA x2 ++ [Equ] ++ compB xs
+        a1 :==: a2 -> compA a1 ++ compA a2 ++ [Equ] ++ compB xs
+        a1 :<=: a2 -> compA a1 ++ compA a2 ++ [Le] ++ compB xs
 
 -- compile 
 compile :: [Stm] -> Code
@@ -201,80 +193,175 @@ compile ((Seq stms):xs) = compile stms ++ compile xs
 compile ((If x stm1 stm2):xs) = compB x ++ [Branch (compile stm1) (compile stm2)] ++ compile xs
 compile ((While x stm):xs) = [Loop (compB x) (compile stm)] ++ compile xs
 
-lexer :: Token.TokenParser ()
-lexer = Token.makeTokenParser emptyDef
-
-myIdentifier :: Parser String
-myIdentifier = Token.identifier lexer
-
-myInteger :: Parser Integer
-myInteger = Token.integer lexer
-
-aexp :: Parser Aexp
-aexp = buildExpressionParser aexpOperators aexpTerm
-
-aexpTerm :: Parser Aexp
-aexpTerm = parens lexer aexp
-       <|> Var <$> myIdentifier
-       <|> Num <$> myInteger
-
-aexpOperators :: OperatorTable String () Identity Aexp
-aexpOperators = [ [Infix (reservedOp lexer "*" >> return (:*:)) AssocLeft]
-                , [Infix (reservedOp lexer "-" >> return (:-:)) AssocLeft]
-                , [Infix (reservedOp lexer "+" >> return (:+:)) AssocLeft]
-                ]
-
-bexp :: Parser Bexp
-bexp = buildExpressionParser bexpOperators bexpTerm
-
-bexpTerm :: Parser Bexp
-bexpTerm = parens lexer bexp
-       <|> BVar <$> myIdentifier
-       <|> BConst <$> myInteger
-       <|> BoolConst <$> (True <$ reserved lexer "true" <|> False <$ reserved lexer "false")
-       <|> Not <$ reservedOp lexer "¬" <*> bexpTerm
-
-bexpOperators :: OperatorTable String () Identity Bexp
-bexpOperators = [ [Prefix (reservedOp lexer "not" >> return Not)]
-                , [Infix (reservedOp lexer "and" >> return (:&:)) AssocLeft]
-                , [Infix (reservedOp lexer "==" >> return (:==:)) AssocLeft]
-                , [Infix (reservedOp lexer "<=" >> return (:<=:)) AssocLeft]
-                ]
-
-stm :: Parser Stm
-stm = Parsec.try assignStm
-  <|> Parsec.try ifStm
-  <|> Parsec.try whileStm
-  <|> seqStm
+lexer :: String -> [Token]
+lexer [] = []
+lexer str
+    | isPrefixOf " " str = lexer (dropWhile (== ' ') str)
+    | otherwise = case find (`isPrefixOf` str) delimiters of
+        Just delimiter -> stringToToken delimiter : lexer (drop (length delimiter) str)
+        Nothing -> let (token, rest) = break (`elem` operatorChars) str
+                   in if not (null token) then stringToToken token : lexer rest else lexer rest
   where
-    assignStm = do
-      var <- myIdentifier
-      reservedOp lexer ":="
-      expr <- aexp
-      reserved lexer ";"
-      return (var :=: expr)
+    delimiters = ["+","-","*","<=","==",":=", "=","<","(",")","{","}",";","not","and","or","if","then","else","while","do","True","False", "i", "fact", "do"]
+    operatorChars = ' ' : nub (concat delimiters)
 
-    ifStm = do
-      reserved lexer "if"
-      cond <- bexp
-      reserved lexer "then"
-      stm1 <- stms
-      reserved lexer "else"
-      stm2 <- stms
-      return (If [cond] stm1 stm2)
+stringToToken :: String -> Token
+stringToToken "+" = PlusTok
+stringToToken "-" = MinusTok
+stringToToken "*" = TimesTok
+stringToToken "/" = DivTok
+stringToToken "(" = OpenTok
+stringToToken ")" = CloseTok
+stringToToken ":=" = AssignTok
+stringToToken "while" = WhileTok
+stringToToken "do" = DoTok
+stringToToken "True" = TrueTok
+stringToToken "False" = FalseTok
+stringToToken "and" = AndTok
+stringToToken "or" = OrTok
+stringToToken "not" = NotTok
+stringToToken "==" = EqTok
+stringToToken "<=" = LeTok
+stringToToken "if" = IfTok
+stringToToken "then" = ThenTok
+stringToToken "else" = ElseTok
+stringToToken ";" = SemicolonTok
+stringToToken str | all isDigit str = IntTok (read str)
+stringToToken str = VarTok str
 
-    seqStm = do
-      reserved lexer "("
-      stms <- many stm
-      reserved lexer ")"
-      return (Seq stms)
+parseAexp :: [Token] -> Maybe (Aexp, [Token])
+parseAexp tokens =
+    case tokens of
+        (IntTok n : restTokens) -> Just (Num n, restTokens)
+        (VarTok v : restTokens) -> Just (Var v, restTokens)
+        _ -> Nothing
     
-    whileStm = do
-    reserved lexer "while"
-    cond <- parens lexer bexp
-    reserved lexer "do"
-    body <- parens lexer stms
-    return (While [cond] body)
+parseAexpOrParent :: [Token] -> Maybe (Aexp, [Token])
+parseAexpOrParent (OpenTok : restofTokens) =
+    case parseAddOrSubMultOrAexpOrParent restofTokens of
+      Just (expr, (CloseTok : restofTokens2)) ->
+          Just (expr,restofTokens2)
+      Just _ -> Nothing
+      Nothing -> Nothing
+parseAexpOrParent tokens = parseAexp tokens
 
-stms :: Parser [Stm]
-stms = many stm
+parseMultOrAexpOrParent :: [Token] -> Maybe (Aexp, [Token])
+parseMultOrAexpOrParent tokens =
+    case parseAexpOrParent tokens of 
+        Just (expr, (TimesTok : restofTokens)) ->
+            case parseMultOrAexpOrParent restofTokens of
+                Just (expr2, restofTokens2) -> Just (expr :*: expr2, restofTokens2)
+                Nothing -> Nothing
+        result -> result
+
+parseAddOrSubMultOrAexpOrParent :: [Token] -> Maybe (Aexp, [Token])
+parseAddOrSubMultOrAexpOrParent tokens = 
+    case parseMultOrAexpOrParent tokens of
+      Just (expr, (PlusTok : restofTokens)) ->
+        case parseAddOrSubMultOrAexpOrParent restofTokens of
+          Just (expr2, restofTokens2) -> Just (expr :+: expr2, restofTokens2)
+          Nothing -> Nothing
+      Just (expr, (MinusTok : restofTokens)) ->
+        case parseAddOrSubMultOrAexpOrParent restofTokens of
+          Just (expr2,restofTokens2) -> Just (expr :-: expr2, restofTokens2)
+          Nothing -> Nothing
+      result -> result
+
+parseBexp :: [Token] -> Maybe (Bexp, [Token])
+parseBexp tokens = parseOr tokens
+
+parseOr :: [Token] -> Maybe (Bexp, [Token])
+parseOr tokens = do
+  (bexp1, restTokens1) <- parseAnd tokens
+  parseOr' bexp1 restTokens1
+
+parseOr' :: Bexp -> [Token] -> Maybe (Bexp, [Token])
+parseOr' bexp1 (OrTok : restTokens) = do
+  (bexp2, restTokens2) <- parseAnd restTokens
+  parseOr' (bexp1 :|: bexp2) restTokens2
+parseOr' bexp1 tokens = Just (bexp1, tokens)
+
+parseAnd :: [Token] -> Maybe (Bexp, [Token])
+parseAnd tokens = do
+  (bexp1, restTokens1) <- parseNot tokens
+  parseAnd' bexp1 restTokens1
+
+parseAnd' :: Bexp -> [Token] -> Maybe (Bexp, [Token])
+parseAnd' bexp1 (AndTok : restTokens) = do
+  (bexp2, restTokens2) <- parseNot restTokens
+  parseAnd' (bexp1 :&: bexp2) restTokens2
+parseAnd' bexp1 tokens = Just (bexp1, tokens)
+
+parseNot :: [Token] -> Maybe (Bexp, [Token])
+parseNot (NotTok : restTokens) = do
+  (bexp, restTokens2) <- parseBexpFactor restTokens
+  Just (Not bexp, restTokens2)
+parseNot tokens = parseBexpFactor tokens
+
+parseRel :: [Token] -> Maybe (Bexp, [Token])
+parseRel tokens = do
+  (aexp1, restTokens1) <- parseAexp tokens
+  case restTokens1 of
+    (LeTok : restTokens2) -> do
+      (aexp2, restTokens3) <- parseAexp restTokens2
+      Just (aexp1 :<=: aexp2, restTokens3)
+    (EqTok : restTokens2) -> do
+      (aexp2, restTokens3) <- parseAexp restTokens2
+      Just (aexp1 :==: aexp2, restTokens3)
+    _ -> Nothing
+
+parseBexpFactor :: [Token] -> Maybe (Bexp, [Token])
+parseBexpFactor (OpenTok : restTokens) = do
+  (bexp, CloseTok : restTokens2) <- parseBexp restTokens
+  Just (bexp, restTokens2)
+parseBexpFactor (TrueTok : restTokens) = Just (BoolConst True, restTokens)
+parseBexpFactor (FalseTok : restTokens) = Just (BoolConst False, restTokens)
+parseBexpFactor (IntTok i : restTokens) = parseRel (IntTok i : restTokens)
+parseBexpFactor (VarTok v : restTokens) = Just (BVar v, restTokens)
+parseBexpFactor _ = Nothing
+
+parseStm :: [Token] -> Maybe (Stm, [Token])
+parseStm tokens = 
+  case tokens of
+    (VarTok v : AssignTok : restofTokens) ->
+      case parseAddOrSubMultOrAexpOrParent restofTokens of
+        Just (expr, restTokens2) -> Just (v :=: expr, restTokens2)
+        Nothing -> Nothing
+    (IfTok : restofTokens) ->
+      case parseBexp restofTokens of
+        Just (bexp, ThenTok : restTokens2) ->
+          case parseStmSeq restTokens2 of
+            Just (stm1, ElseTok : restTokens3) ->
+              case parseStmSeq restTokens3 of
+                Just (stm2, restTokens4) -> Just (If [bexp] stm1 stm2, restTokens4)
+                Nothing -> Nothing
+            Nothing -> Nothing
+        Nothing -> Nothing
+    (WhileTok : restofTokens) ->
+      case parseBexp restofTokens of
+        Just (bexp, DoTok : restTokens2) ->
+          case parseStmSeq restTokens2 of
+            Just (stm, restTokens3) -> Just (While [bexp] stm, restTokens3)
+            Nothing -> Nothing
+        Nothing -> Nothing
+    (OpenTok : restofTokens) ->
+      case parseStmSeq restofTokens of
+        Just (stm, CloseTok : restTokens2) -> Just (Seq stm, restTokens2)
+        Nothing -> Nothing
+    _ -> Nothing
+
+parseStmSeq :: [Token] -> Maybe ([Stm], [Token])
+parseStmSeq (SemicolonTok : restofTokens) =
+  case parseStm restofTokens of
+    Just (stm, restTokens2) ->
+      case parseStmSeq restTokens2 of
+        Just (stmSeq, restTokens3) -> Just (stm : stmSeq, restTokens3)
+        Nothing -> Just ([stm], restTokens2)
+    Nothing -> Nothing
+parseStmSeq tokens = Just ([], tokens)
+
+main :: IO ()
+main = do
+    let tokens = lexer "2 <= 5 and 3 == 4 or 2 <= 5 and 3 == 4"
+    print tokens
+    print $ parseBexp tokens
