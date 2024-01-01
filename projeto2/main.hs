@@ -11,6 +11,7 @@ import Text.Parsec.Expr
 import Text.Parsec.Token as Token
 import Text.Parsec.Language (emptyDef)
 import Control.Applicative ((<*), (*>), (<|>))
+import Control.Applicative (many)
 import Data.Functor.Identity (Identity)
 import Data.Char (isDigit)
 
@@ -361,6 +362,6 @@ parseStmSeq tokens = Just ([], tokens)
 
 main :: IO ()
 main = do
-    let tokens = lexer "not True and 2 <= 5 and 3 == 4"
+    let tokens = lexer "2 <= 5 and 3 == 4 or 2 <= 5 and 3 == 4"
     print tokens
     print $ parseBexp tokens
