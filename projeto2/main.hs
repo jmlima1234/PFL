@@ -192,6 +192,7 @@ compile ((x :=: a):xs) = compA a ++ [Store x] ++ compile xs
 compile ((Seq stms):xs) = compile stms ++ compile xs
 compile ((If x stm1 stm2):xs) = compB x ++ [Branch (compile stm1) (compile stm2)] ++ compile xs
 compile ((While x stm):xs) = [Loop (compB x) (compile stm)] ++ compile xs
+compile ((Skip):xs) = compile xs
 
 lexer :: String -> [Token]
 lexer [] = []
@@ -316,9 +317,14 @@ parseBexpFactor (OpenTok : restTokens) = do
   Just (bexp, restTokens2)
 parseBexpFactor (TrueTok : restTokens) = Just (BoolConst True, restTokens)
 parseBexpFactor (FalseTok : restTokens) = Just (BoolConst False, restTokens)
-parseBexpFactor (IntTok i : restTokens) = parseRel (IntTok i : restTokens)
-parseBexpFactor (VarTok v : restTokens) = Just (BVar v, restTokens)
-parseBexpFactor _ = Nothing
+parseBexpFactor tokens =
+  case parseRel tokens of
+    Just (bexp, restTokens) -> Just (bexp, restTokens)
+    Nothing ->
+      case parseAexpOrParent tokens of
+        Just (aexp, restTokens) -> Just (aexp :==: Num 0, restTokens) -- Handle the case when only an arithmetic expression is present
+        _ -> Nothing
+
 
 parseElse :: [Token] -> Maybe ([Stm], [Token])
 parseElse tokens = 
@@ -354,7 +360,16 @@ parseSeqUntilDo tokens = loop tokens []
         Nothing -> Nothing
 
 parseStm :: [Token] -> Maybe (Stm, [Token])
-parseStm tokens = 
+parseStm tokens = do
+  (stm, restTokens) <- parseStm' tokens
+  case restTokens of
+    (SemicolonTok : restTokens2) -> do
+      (stmSeq, restTokens3) <- parseStmSeq restTokens2
+      Just (Seq (stm : stmSeq), restTokens3)
+    _ -> Just (stm, restTokens)
+
+parseStm' :: [Token] -> Maybe (Stm, [Token])
+parseStm' tokens = 
   case tokens of
     (VarTok v : AssignTok : restofTokens) ->
       case parseAddOrSubMultOrAexpOrParent restofTokens of
@@ -365,39 +380,69 @@ parseStm tokens =
         Just (bexp, ThenTok : restTokens2) ->
           case parseStmSeq restTokens2 of
             Just (stm1, ElseTok : restTokens3) ->
-              case parseElse restTokens3 of
+              case parseStmSeq restTokens3 of
                 Just (stm2, restTokens4) -> Just (If [bexp] stm1 stm2, restTokens4)
-                Nothing -> 
-                  case parseStm restTokens3 of 
-                    Just (stmElse, restTokens4) -> Just (If [bexp] stm1 [stmElse], restTokens4)
-                    Nothing -> Nothing
-            Nothing -> Nothing
-        Nothing -> Nothing
+                Nothing ->
+                  case parseStm restTokens3 of
+                    Just (stmElse, restTokens4) -> Just(If [bexp] stm1 [stmElse], restTokens4)
+                    Nothing -> error "Error parsing else"
+            Nothing -> error "Error parsing then"
+        Nothing -> error "Error parsing if condition"
     (WhileTok : restofTokens) ->
-      case parseSeqUntilDo restofTokens of
+      case parseBexp restofTokens of
         Just (bexp, DoTok : restTokens2) ->
           case parseStmSeq restTokens2 of
             Just (stm, restTokens3) -> Just (While [bexp] stm, restTokens3)
             Nothing -> Nothing
         Nothing -> Nothing
-    (OpenTok : restofTokens) ->
-      case parseStmSeq restofTokens of
-        Just (stm, CloseTok : restTokens2) -> Just (Seq stm, restTokens2)
+    (OpenTok : VarTok v : AssignTok : restofTokens) ->
+      case parseAddOrSubMultOrAexpOrParent restofTokens of
+        Just (expr, restTokens2) -> Just (v :=: expr, restTokens2)
         Nothing -> Nothing
+    (SemicolonTok : restTokens) -> 
+        Just (Skip, restTokens)
+    (CloseTok : restTokens) ->
+        Just (Skip, restTokens)
     _ -> Nothing
 
 parseStmSeq :: [Token] -> Maybe ([Stm], [Token])
-parseStmSeq (SemicolonTok : restofTokens) =
-  case parseStm restofTokens of
-    Just (stm, restTokens2) ->
-      case parseStmSeq restTokens2 of
-        Just (stmSeq, restTokens3) -> Just (stm : stmSeq, restTokens3)
-        Nothing -> Just ([stm], restTokens2)
+parseStmSeq tokens = 
+  case parseStm' tokens of
+    Just (stm, restTokens) ->
+      case restTokens of
+        (SemicolonTok : restTokens2) ->
+          case parseStmSeq restTokens2 of
+            Just (stmSeq, restTokens3) -> Just (stm : stmSeq, restTokens3)
+            Nothing -> Just ([stm], restTokens2)
+        _ -> Just ([stm], restTokens)
     Nothing -> Nothing
-parseStmSeq tokens = Just ([], tokens)
+
+parse :: String -> [Stm]
+parse str = parseProgram (lexer str)
+
+parseProgram :: [Token] -> [Stm]
+parseProgram tokens = 
+  case tokens of
+    [] -> []
+    _ ->
+      case parseStm tokens of
+        Just (stm, restTokens) -> stm : parseProgram restTokens
+        _ -> []
+
+testParser :: String -> (String, String)
+testParser programCode = (stack2Str stack, state2Str store)
+  where (_,stack,store) = run(compile (parse programCode), createEmptyStack, createEmptyState)
 
 main :: IO ()
 main = do
-    let tokens = lexer "2 <= 5 and 3 == 4 or 2 <= 5 and 3 == 4"
-    print tokens
-    print $ parseBexp tokens
+    -- let tokens = lexer "x := 42; if x <= 43 then x := 1; else (x := 33; x := x+1;)"
+    -- print tokens
+    -- print $ parseStm tokens
+    print $ testParser "x := 5; x := x - 1;" == ("","x=4")
+    print $ testParser "if (not True and 2 <= 5 and 3 == 4) then x :=1; else y := 2;" == ("","y=2")
+    print $ testParser "x := 42; if x <= 43 then x := 1; else (x := 33; x := x+1;)" == ("","x=1")
+    print $ testParser "x := 42; if x <= 43 then x := 1; else x := 33; x := x+1;" == ("","x=2")
+    print $ testParser "x := 42; if x <= 43 then x := 1; else x := 33; x := x+1; z := x+x;" == ("","x=2,z=4")
+    print $ testParser "x := 2; y := (x - 3)*(4 + 2*3); z := x +x*(2);" == ("","x=2,y=-10,z=6")
+    print $ testParser "i := 10; fact := 1; while (not(i == 1)) do (fact := fact * i; i := i - 1;);" == ("","fact=3628800,i=1")
+
