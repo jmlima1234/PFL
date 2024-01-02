@@ -192,7 +192,8 @@ compile ((x :=: a):xs) = compA a ++ [Store x] ++ compile xs
 compile ((Seq stms):xs) = compile stms ++ compile xs
 compile ((If x stm1 stm2):xs) = compB x ++ [Branch (compile stm1) (compile stm2)] ++ compile xs
 compile ((While x stm):xs) = [Loop (compB x) (compile stm)] ++ compile xs
-compile ((Skip):xs) = compile xs
+compile (Skip:xs) = compile xs  
+
 
 lexer :: String -> [Token]
 lexer [] = []
