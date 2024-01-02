@@ -39,7 +39,7 @@ Tenhamos como exemplo este input : "i := 10; fact := 1; while (not(i == 1)) do (
 4) A máquina entra no loop e a condição vai ser avaliada. Caso esta seja verdadeira, o corpo do loop vai ser executado.
 5) No fim, quando a variável `i` tiver o valor 1, o ciclo para e a variável `fact` vai conter o resultado final que vai corresponder ao fatorial de 10 tal como se pode ver na imagem abaixo:
 
-![Alt text](image.png)
+![Alt text](10factorial.png)
 
 ## **conclusões**
 Com este trabalho prático, conseguimos consolidar os nossos conhecimentos sobre a linguagem de programação *Haskell* e obter uma melhor compreensão sobre novos conceitos desta linguagem. Quanto ao projeto em si, achamos que devido a alguns constrangimentos temporais gerados por outros trabalhos, não conseguimos desenvolver o projeto da melhor forma possível. No entanto, conseguimos atingir a maior parte dos objetivos, sendo que apesar de passar na maior parte dos testes, naqueles que existiam statments após um else, nos quais teriam de ser executados, independetemente da condição do if, não conseguimos obter o resultado esperado. Verificamos que esses statments eram adicionados à branch do else em vez de estarem fora do if mas mesmo assim não conseguimos resolver o problema. Apesar disso, achamos que o projeto se encontra solido e bem estruturado.
