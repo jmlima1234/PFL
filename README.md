@@ -33,13 +33,14 @@ Decisões tomadas:
 ## **Exemplo**
 Tenhamos como exemplo este input : "i := 10; fact := 1; while (not(i == 1)) do (fact := fact * i; i := i - 1;);"
 1) As variáveis `i` e `fact` são inicializadas, criamos uma pilha vazia e um estado de máquina inicial, sendo neste caso uma lista vazia
-2) O nosso compilados vai traduzir o programa imperativo para uma sequÊncia de instruções:
-        [push-10, store-i, push-1, store-fact, loop([branch([true, push-1, fetch-i, eq, neg], [noop]),
-    fetch-fact, fetch-i, mult, store-fact, fetch-i, push-1, sub, store-i])]
+2) O nosso compilador vai traduzir o programa imperativo para uma sequência de instruções:
+    [Push 10,Store "i",Push 1,Store "fact",Loop [Fetch "i",Push 1,Equ,Neg] [Fetch "i",Fetch "fact",Mult,Store "fact",Push 1,Fetch "i",Sub,Store "i"]]
 3) A função `run` vai ser chamada com a sequência de instruções, uma pilha vazia e o estado inicial e, para além disso, as instruções vão ser executadas passo a passo, manipulando a pilha e o estado conforme necessário.
 4) A máquina entra no loop e a condição vai ser avaliada. Caso esta seja verdadeira, o corpo do loop vai ser executado.
-5) No fim, quando a a variável `i` tiver o valor 1, o ciclo para e a variável `fact` vai conter o resultaod final que vai corresponder ao fatorial de 10.
+5) No fim, quando a variável `i` tiver o valor 1, o ciclo para e a variável `fact` vai conter o resultado final que vai corresponder ao fatorial de 10 tal como se pode ver na imagem abaixo:
+
+![Alt text](image.png)
+
+## **conclusões**
+Com este trabalho prático, conseguimos consolidar os nossos conhecimentos sobre a linguagem de programação *Haskell* e obter uma melhor compreensão sobre novos conceitos desta linguagem. Quanto ao projeto em si, achamos que devido a alguns constrangimentos temporais gerados por outros trabalhos, não conseguimos desenvolver o projeto da melhor forma possível. No entanto, conseguimos atingir a maior parte dos objetivos, sendo que apesar de passar na maior parte dos testes, naqueles que existiam statments após um else, nos quais teriam de ser executados, independetemente da condição do if, não conseguimos obter o resultado esperado. Verificamos que esses statments eram adicionados à branch do else em vez de estarem fora do if mas mesmo assim não conseguimos resolver o problema. Apesar disso, achamos que o projeto se encontra solido e bem estruturado.
 </div>
-
-
-
